@@ -1,0 +1,72 @@
+table:
+  name: billing_history
+  schema: public
+object_relationships:
+  - name: tenant
+    using:
+      foreign_key_constraint_on: tenant_id
+  - name: plan
+    using:
+      foreign_key_constraint_on: plan_id
+select_permissions:
+  - role: owner
+    permission:
+      columns:
+        - id
+        - tenant_id
+        - plan_id
+        - amount
+        - currency
+        - billing_period_start
+        - billing_period_end
+        - status
+        - payment_method
+        - invoice_url
+        - created_at
+        - updated_at
+      filter:
+        tenant_id:
+          _eq: X-Hasura-Tenant-Id
+  - role: super_admin
+    permission:
+      columns:
+        - id
+        - tenant_id
+        - plan_id
+        - amount
+        - currency
+        - billing_period_start
+        - billing_period_end
+        - status
+        - payment_method
+        - external_payment_id
+        - invoice_url
+        - created_at
+        - updated_at
+      filter: {}
+insert_permissions:
+  - role: super_admin
+    permission:
+      columns:
+        - tenant_id
+        - plan_id
+        - amount
+        - currency
+        - billing_period_start
+        - billing_period_end
+        - status
+        - payment_method
+        - external_payment_id
+        - invoice_url
+      filter: {}
+      check: {}
+update_permissions:
+  - role: super_admin
+    permission:
+      columns:
+        - status
+        - payment_method
+        - external_payment_id
+        - invoice_url
+      filter: {}
+      check: {}

@@ -1,0 +1,61 @@
+table:
+  name: tenant_feature_overrides
+  schema: public
+object_relationships:
+  - name: tenant
+    using:
+      foreign_key_constraint_on: tenant_id
+  - name: feature_flag
+    using:
+      foreign_key_constraint_on: feature_flag_id
+select_permissions:
+  - role: user
+    permission:
+      columns:
+        - id
+        - tenant_id
+        - feature_flag_id
+        - is_enabled
+        - limits
+        - expires_at
+        - reason
+        - created_at
+      filter:
+        tenant_id:
+          _eq: X-Hasura-Tenant-Id
+  - role: super_admin
+    permission:
+      columns:
+        - id
+        - tenant_id
+        - feature_flag_id
+        - is_enabled
+        - limits
+        - expires_at
+        - reason
+        - created_by
+        - created_at
+      filter: {}
+insert_permissions:
+  - role: super_admin
+    permission:
+      columns:
+        - tenant_id
+        - feature_flag_id
+        - is_enabled
+        - limits
+        - expires_at
+        - reason
+        - created_by
+      filter: {}
+      check: {}
+update_permissions:
+  - role: super_admin
+    permission:
+      columns:
+        - is_enabled
+        - limits
+        - expires_at
+        - reason
+      filter: {}
+      check: {}

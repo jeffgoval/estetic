@@ -1,0 +1,108 @@
+# Queries para Pacientes
+query GetPatients($limit: Int, $offset: Int, $where: patients_bool_exp, $order_by: [patients_order_by!]) {
+  patients(
+    limit: $limit
+    offset: $offset
+    where: $where
+    order_by: $order_by
+  ) {
+    id
+    tenant_id
+    name
+    phone
+    email
+    cpf
+    birth_date
+    address
+    emergency_contact
+    medical_history
+    is_active
+    created_at
+    updated_at
+  }
+  patients_aggregate(where: $where) {
+    aggregate {
+      count
+    }
+  }
+}
+
+query GetPatient($id: uuid!) {
+  patients_by_pk(id: $id) {
+    id
+    tenant_id
+    name
+    phone
+    email
+    cpf
+    birth_date
+    address
+    emergency_contact
+    medical_history
+    is_active
+    created_at
+    updated_at
+  }
+}
+
+# Mutations para Pacientes
+mutation CreatePatient($object: patients_insert_input!) {
+  insert_patients_one(object: $object) {
+    id
+    tenant_id
+    name
+    phone
+    email
+    cpf
+    birth_date
+    address
+    emergency_contact
+    medical_history
+    is_active
+    created_at
+    updated_at
+  }
+}
+
+mutation UpdatePatient($id: uuid!, $changes: patients_set_input!) {
+  update_patients_by_pk(pk_columns: { id: $id }, _set: $changes) {
+    id
+    tenant_id
+    name
+    phone
+    email
+    cpf
+    birth_date
+    address
+    emergency_contact
+    medical_history
+    is_active
+    created_at
+    updated_at
+  }
+}
+
+mutation DeletePatient($id: uuid!) {
+  delete_patients_by_pk(id: $id) {
+    id
+  }
+}
+
+# Subscription para atualizações em tempo real
+subscription PatientsSubscription($where: patients_bool_exp) {
+  patients(where: $where, order_by: { created_at: desc }) {
+    id
+    tenant_id
+    name
+    phone
+    email
+    cpf
+    birth_date
+    address
+    emergency_contact
+    medical_history
+    is_active
+    created_at
+    updated_at
+  }
+}

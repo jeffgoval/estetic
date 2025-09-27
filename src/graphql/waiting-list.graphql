@@ -1,0 +1,158 @@
+# Queries para Lista de Espera
+query GetWaitingList($limit: Int, $offset: Int, $where: waiting_list_bool_exp, $order_by: [waiting_list_order_by!]) {
+  waiting_list(
+    limit: $limit
+    offset: $offset
+    where: $where
+    order_by: $order_by
+  ) {
+    id
+    tenant_id
+    patient_id
+    professional_id
+    preferred_date
+    preferred_time_start
+    preferred_time_end
+    priority
+    status
+    notes
+    created_at
+    updated_at
+    patient {
+      id
+      name
+      phone
+      email
+    }
+    professional {
+      id
+      name
+      specialty
+    }
+  }
+  waiting_list_aggregate(where: $where) {
+    aggregate {
+      count
+    }
+  }
+}
+
+query GetWaitingListItem($id: uuid!) {
+  waiting_list_by_pk(id: $id) {
+    id
+    tenant_id
+    patient_id
+    professional_id
+    preferred_date
+    preferred_time_start
+    preferred_time_end
+    priority
+    status
+    notes
+    created_at
+    updated_at
+    patient {
+      id
+      name
+      phone
+      email
+    }
+    professional {
+      id
+      name
+      specialty
+    }
+  }
+}
+
+# Mutations para Lista de Espera
+mutation CreateWaitingListItem($object: waiting_list_insert_input!) {
+  insert_waiting_list_one(object: $object) {
+    id
+    tenant_id
+    patient_id
+    professional_id
+    preferred_date
+    preferred_time_start
+    preferred_time_end
+    priority
+    status
+    notes
+    created_at
+    updated_at
+    patient {
+      id
+      name
+      phone
+      email
+    }
+    professional {
+      id
+      name
+      specialty
+    }
+  }
+}
+
+mutation UpdateWaitingListItem($id: uuid!, $changes: waiting_list_set_input!) {
+  update_waiting_list_by_pk(pk_columns: { id: $id }, _set: $changes) {
+    id
+    tenant_id
+    patient_id
+    professional_id
+    preferred_date
+    preferred_time_start
+    preferred_time_end
+    priority
+    status
+    notes
+    created_at
+    updated_at
+    patient {
+      id
+      name
+      phone
+      email
+    }
+    professional {
+      id
+      name
+      specialty
+    }
+  }
+}
+
+mutation DeleteWaitingListItem($id: uuid!) {
+  delete_waiting_list_by_pk(id: $id) {
+    id
+  }
+}
+
+# Subscription para atualizações em tempo real
+subscription WaitingListSubscription($where: waiting_list_bool_exp) {
+  waiting_list(where: $where, order_by: { priority: desc, created_at: asc }) {
+    id
+    tenant_id
+    patient_id
+    professional_id
+    preferred_date
+    preferred_time_start
+    preferred_time_end
+    priority
+    status
+    notes
+    created_at
+    updated_at
+    patient {
+      id
+      name
+      phone
+      email
+    }
+    professional {
+      id
+      name
+      specialty
+    }
+  }
+}

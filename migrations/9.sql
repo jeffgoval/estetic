@@ -1,0 +1,11 @@
+
+CREATE TABLE ai_analytics (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  tenant_id INTEGER NOT NULL,
+  metric_name TEXT NOT NULL,
+  metric_value REAL NOT NULL,
+  metric_date DATE NOT NULL,
+  metadata TEXT,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);

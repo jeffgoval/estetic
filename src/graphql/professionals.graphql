@@ -1,0 +1,98 @@
+# Queries para Profissionais
+query GetProfessionals($limit: Int, $offset: Int, $where: professionals_bool_exp, $order_by: [professionals_order_by!]) {
+  professionals(
+    limit: $limit
+    offset: $offset
+    where: $where
+    order_by: $order_by
+  ) {
+    id
+    tenant_id
+    name
+    registration_number
+    specialty
+    phone
+    email
+    working_hours
+    is_active
+    created_at
+    updated_at
+  }
+  professionals_aggregate(where: $where) {
+    aggregate {
+      count
+    }
+  }
+}
+
+query GetProfessional($id: uuid!) {
+  professionals_by_pk(id: $id) {
+    id
+    tenant_id
+    name
+    registration_number
+    specialty
+    phone
+    email
+    working_hours
+    is_active
+    created_at
+    updated_at
+  }
+}
+
+# Mutations para Profissionais
+mutation CreateProfessional($object: professionals_insert_input!) {
+  insert_professionals_one(object: $object) {
+    id
+    tenant_id
+    name
+    registration_number
+    specialty
+    phone
+    email
+    working_hours
+    is_active
+    created_at
+    updated_at
+  }
+}
+
+mutation UpdateProfessional($id: uuid!, $changes: professionals_set_input!) {
+  update_professionals_by_pk(pk_columns: { id: $id }, _set: $changes) {
+    id
+    tenant_id
+    name
+    registration_number
+    specialty
+    phone
+    email
+    working_hours
+    is_active
+    created_at
+    updated_at
+  }
+}
+
+mutation DeleteProfessional($id: uuid!) {
+  delete_professionals_by_pk(id: $id) {
+    id
+  }
+}
+
+# Subscription para atualizações em tempo real
+subscription ProfessionalsSubscription($where: professionals_bool_exp) {
+  professionals(where: $where, order_by: { created_at: desc }) {
+    id
+    tenant_id
+    name
+    registration_number
+    specialty
+    phone
+    email
+    working_hours
+    is_active
+    created_at
+    updated_at
+  }
+}

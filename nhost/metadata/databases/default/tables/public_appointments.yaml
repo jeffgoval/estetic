@@ -1,0 +1,92 @@
+table:
+  name: appointments
+  schema: public
+object_relationships:
+  - name: tenant
+    using:
+      foreign_key_constraint_on: tenant_id
+  - name: patient
+    using:
+      foreign_key_constraint_on: patient_id
+  - name: professional
+    using:
+      foreign_key_constraint_on: professional_id
+  - name: created_by_user
+    using:
+      foreign_key_constraint_on: created_by
+array_relationships:
+  - name: anamnesis_forms
+    using:
+      foreign_key_constraint_on:
+        column: appointment_id
+        table:
+          name: anamnesis_forms
+          schema: public
+select_permissions:
+  - role: user
+    permission:
+      columns:
+        - id
+        - tenant_id
+        - patient_id
+        - professional_id
+        - title
+        - description
+        - start_datetime
+        - end_datetime
+        - status
+        - service_type
+        - notes
+        - created_by
+        - created_at
+        - updated_at
+      filter:
+        tenant_id:
+          _eq: X-Hasura-Tenant-Id
+insert_permissions:
+  - role: user
+    permission:
+      columns:
+        - tenant_id
+        - patient_id
+        - professional_id
+        - title
+        - description
+        - start_datetime
+        - end_datetime
+        - status
+        - service_type
+        - notes
+        - created_by
+      filter: {}
+      check:
+        tenant_id:
+          _eq: X-Hasura-Tenant-Id
+update_permissions:
+  - role: user
+    permission:
+      columns:
+        - title
+        - description
+        - start_datetime
+        - end_datetime
+        - status
+        - service_type
+        - notes
+      filter:
+        tenant_id:
+          _eq: X-Hasura-Tenant-Id
+      check:
+        tenant_id:
+          _eq: X-Hasura-Tenant-Id
+delete_permissions:
+  - role: admin
+    permission:
+      filter:
+        tenant_id:
+          _eq: X-Hasura-Tenant-Id
+  - role: owner
+    permission:
+      filter:
+        tenant_id:
+          _eq: X-Hasura-Tenant-Id

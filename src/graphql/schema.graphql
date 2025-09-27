@@ -1,0 +1,1354 @@
+# Schema GraphQL baseado no design do banco de dados
+
+scalar uuid
+scalar timestamptz
+scalar jsonb
+scalar numeric
+scalar date
+scalar time
+
+# Tipos de entrada para filtros
+input String_comparison_exp {
+  _eq: String
+  _neq: String
+  _gt: String
+  _gte: String
+  _lt: String
+  _lte: String
+  _in: [String!]
+  _nin: [String!]
+  _like: String
+  _nlike: String
+  _ilike: String
+  _nilike: String
+  _is_null: Boolean
+}
+
+input Int_comparison_exp {
+  _eq: Int
+  _neq: Int
+  _gt: Int
+  _gte: Int
+  _lt: Int
+  _lte: Int
+  _in: [Int!]
+  _nin: [Int!]
+  _is_null: Boolean
+}
+
+input Boolean_comparison_exp {
+  _eq: Boolean
+  _neq: Boolean
+  _is_null: Boolean
+}
+
+input uuid_comparison_exp {
+  _eq: uuid
+  _neq: uuid
+  _in: [uuid!]
+  _nin: [uuid!]
+  _is_null: Boolean
+}
+
+input timestamptz_comparison_exp {
+  _eq: timestamptz
+  _neq: timestamptz
+  _gt: timestamptz
+  _gte: timestamptz
+  _lt: timestamptz
+  _lte: timestamptz
+  _in: [timestamptz!]
+  _nin: [timestamptz!]
+  _is_null: Boolean
+}
+
+input date_comparison_exp {
+  _eq: date
+  _neq: date
+  _gt: date
+  _gte: date
+  _lt: date
+  _lte: date
+  _in: [date!]
+  _nin: [date!]
+  _is_null: Boolean
+}
+
+input numeric_comparison_exp {
+  _eq: numeric
+  _neq: numeric
+  _gt: numeric
+  _gte: numeric
+  _lt: numeric
+  _lte: numeric
+  _in: [numeric!]
+  _nin: [numeric!]
+  _is_null: Boolean
+}
+
+input jsonb_comparison_exp {
+  _eq: jsonb
+  _neq: jsonb
+  _in: [jsonb!]
+  _nin: [jsonb!]
+  _is_null: Boolean
+}
+
+# Enums
+enum order_by {
+  asc
+  desc
+}
+
+enum appointment_status_enum {
+  scheduled
+  confirmed
+  in_progress
+  completed
+  cancelled
+  no_show
+}
+
+enum subscription_status_enum {
+  trial
+  active
+  past_due
+  cancelled
+  suspended
+}
+
+enum user_role_enum {
+  super_admin
+  owner
+  admin
+  professional
+  receptionist
+}
+
+enum entry_type_enum {
+  in
+  out
+}
+
+enum waiting_list_status_enum {
+  waiting
+  contacted
+  scheduled
+  cancelled
+}
+
+enum anamnesis_status_enum {
+  pending
+  completed
+  expired
+}
+
+enum billing_status_enum {
+  pending
+  paid
+  failed
+  refunded
+}
+
+# Tipos principais
+type subscription_plans {
+  id: uuid!
+  name: String!
+  description: String
+  price_monthly: numeric!
+  price_yearly: numeric
+  max_users: Int
+  max_patients: Int
+  max_appointments_per_month: Int
+  features: jsonb!
+  is_active: Boolean!
+  is_popular: Boolean!
+  sort_order: Int!
+  created_at: timestamptz!
+  updated_at: timestamptz!
+}
+
+type feature_flags {
+  id: uuid!
+  key: String!
+  name: String!
+  description: String
+  category: String
+  is_premium: Boolean!
+  created_at: timestamptz!
+  updated_at: timestamptz!
+}
+
+type plan_features {
+  id: uuid!
+  plan_id: uuid!
+  feature_flag_id: uuid!
+  is_enabled: Boolean!
+  limits: jsonb
+  created_at: timestamptz!
+  plan: subscription_plans!
+  feature_flag: feature_flags!
+}
+
+type tenants {
+  id: uuid!
+  name: String!
+  subdomain: String
+  logo_url: String
+  primary_color: String!
+  secondary_color: String!
+  is_active: Boolean!
+  plan_id: uuid
+  subscription_status: subscription_status_enum!
+  trial_ends_at: timestamptz
+  subscription_starts_at: timestamptz
+  subscription_ends_at: timestamptz
+  billing_email: String
+  billing_address: jsonb
+  created_at: timestamptz!
+  updated_at: timestamptz!
+  plan: subscription_plans
+}
+
+type tenant_feature_overrides {
+  id: uuid!
+  tenant_id: uuid!
+  feature_flag_id: uuid!
+  is_enabled: Boolean!
+  limits: jsonb
+  expires_at: timestamptz
+  reason: String
+  created_by: uuid
+  created_at: timestamptz!
+  tenant: tenants!
+  feature_flag: feature_flags!
+}
+
+type tenant_usage {
+  id: uuid!
+  tenant_id: uuid!
+  feature_key: String!
+  usage_count: Int!
+  period_start: timestamptz!
+  period_end: timestamptz!
+  metadata: jsonb
+  created_at: timestamptz!
+  updated_at: timestamptz!
+  tenant: tenants!
+}
+
+type billing_history {
+  id: uuid!
+  tenant_id: uuid!
+  plan_id: uuid
+  amount: numeric!
+  currency: String!
+  billing_period_start: timestamptz!
+  billing_period_end: timestamptz!
+  status: billing_status_enum!
+  payment_method: String
+  external_payment_id: String
+  invoice_url: String
+  created_at: timestamptz!
+  updated_at: timestamptz!
+  tenant: tenants!
+  plan: subscription_plans
+}
+
+type users {
+  id: uuid!
+  tenant_id: uuid!
+  email: String!
+  display_name: String
+  role: user_role_enum!
+  is_active: Boolean!
+  is_super_admin: Boolean!
+  last_login_at: timestamptz
+  created_at: timestamptz!
+  updated_at: timestamptz!
+  tenant: tenants!
+}
+
+type patients {
+  id: uuid!
+  tenant_id: uuid!
+  name: String!
+  phone: String
+  email: String
+  cpf: String
+  birth_date: date
+  address: String
+  emergency_contact: String
+  medical_history: String
+  is_active: Boolean!
+  created_at: timestamptz!
+  updated_at: timestamptz!
+  tenant: tenants!
+}
+
+type professionals {
+  id: uuid!
+  tenant_id: uuid!
+  name: String!
+  registration_number: String
+  specialty: String
+  phone: String
+  email: String
+  working_hours: jsonb
+  is_active: Boolean!
+  created_at: timestamptz!
+  updated_at: timestamptz!
+  tenant: tenants!
+}
+
+type appointments {
+  id: uuid!
+  tenant_id: uuid!
+  patient_id: uuid!
+  professional_id: uuid!
+  title: String!
+  description: String
+  start_datetime: timestamptz!
+  end_datetime: timestamptz!
+  status: appointment_status_enum!
+  service_type: String
+  notes: String
+  created_by: uuid
+  created_at: timestamptz!
+  updated_at: timestamptz!
+  tenant: tenants!
+  patient: patients!
+  professional: professionals!
+}
+
+type material_categories {
+  id: uuid!
+  tenant_id: uuid!
+  name: String!
+  description: String
+  is_active: Boolean!
+  created_at: timestamptz!
+  updated_at: timestamptz!
+  tenant: tenants!
+}
+
+type materials {
+  id: uuid!
+  tenant_id: uuid!
+  category_id: uuid
+  name: String!
+  brand: String
+  description: String
+  unit_type: String!
+  min_stock_level: Int!
+  max_stock_level: Int!
+  current_stock: Int!
+  unit_cost: numeric!
+  supplier_name: String
+  supplier_contact: String
+  is_active: Boolean!
+  created_at: timestamptz!
+  updated_at: timestamptz!
+  tenant: tenants!
+  category: material_categories
+}
+
+type material_entries {
+  id: uuid!
+  tenant_id: uuid!
+  material_id: uuid!
+  entry_type: entry_type_enum!
+  quantity: Int!
+  unit_cost: numeric!
+  total_cost: numeric!
+  expiry_date: date
+  batch_number: String
+  supplier_name: String
+  invoice_number: String
+  notes: String
+  created_by: uuid
+  created_at: timestamptz!
+  tenant: tenants!
+  material: materials!
+}
+
+type waiting_list {
+  id: uuid!
+  tenant_id: uuid!
+  patient_id: uuid!
+  professional_id: uuid
+  preferred_date: date
+  preferred_time_start: time
+  preferred_time_end: time
+  priority: Int!
+  status: waiting_list_status_enum!
+  notes: String
+  created_at: timestamptz!
+  updated_at: timestamptz!
+  tenant: tenants!
+  patient: patients!
+  professional: professionals
+}
+
+type anamnesis_templates {
+  id: uuid!
+  tenant_id: uuid!
+  name: String!
+  description: String
+  sections: jsonb!
+  is_active: Boolean!
+  is_default: Boolean!
+  created_by: uuid
+  created_at: timestamptz!
+  updated_at: timestamptz!
+  tenant: tenants!
+}
+
+type anamnesis_forms {
+  id: uuid!
+  tenant_id: uuid!
+  patient_id: uuid!
+  appointment_id: uuid
+  template_id: uuid!
+  form_token: String!
+  form_data: jsonb
+  status: anamnesis_status_enum!
+  alerts_detected: jsonb
+  expires_at: timestamptz
+  completed_at: timestamptz
+  sent_at: timestamptz
+  created_at: timestamptz!
+  updated_at: timestamptz!
+  tenant: tenants!
+  patient: patients!
+  appointment: appointments
+  template: anamnesis_templates!
+}
+
+# Tipos de agregação
+type patients_aggregate_fields {
+  count: Int
+}
+
+type patients_aggregate {
+  aggregate: patients_aggregate_fields
+}
+
+type appointments_aggregate_fields {
+  count: Int
+}
+
+type appointments_aggregate {
+  aggregate: appointments_aggregate_fields
+}
+
+type professionals_aggregate_fields {
+  count: Int
+}
+
+type professionals_aggregate {
+  aggregate: professionals_aggregate_fields
+}
+
+type materials_aggregate_fields {
+  count: Int
+}
+
+type materials_aggregate {
+  aggregate: materials_aggregate_fields
+}
+
+type material_entries_aggregate_fields {
+  count: Int
+}
+
+type material_entries_aggregate {
+  aggregate: material_entries_aggregate_fields
+}
+
+type waiting_list_aggregate_fields {
+  count: Int
+}
+
+type waiting_list_aggregate {
+  aggregate: waiting_list_aggregate_fields
+}
+
+type anamnesis_templates_aggregate_fields {
+  count: Int
+}
+
+type anamnesis_templates_aggregate {
+  aggregate: anamnesis_templates_aggregate_fields
+}
+
+type anamnesis_forms_aggregate_fields {
+  count: Int
+}
+
+type anamnesis_forms_aggregate {
+  aggregate: anamnesis_forms_aggregate_fields
+}
+
+type tenants_aggregate_fields {
+  count: Int
+}
+
+type tenants_aggregate {
+  aggregate: tenants_aggregate_fields
+}
+
+# Tipos de filtro bool_exp
+input patients_bool_exp {
+  _and: [patients_bool_exp!]
+  _not: patients_bool_exp
+  _or: [patients_bool_exp!]
+  id: uuid_comparison_exp
+  tenant_id: uuid_comparison_exp
+  name: String_comparison_exp
+  phone: String_comparison_exp
+  email: String_comparison_exp
+  cpf: String_comparison_exp
+  birth_date: date_comparison_exp
+  address: String_comparison_exp
+  emergency_contact: String_comparison_exp
+  medical_history: String_comparison_exp
+  is_active: Boolean_comparison_exp
+  created_at: timestamptz_comparison_exp
+  updated_at: timestamptz_comparison_exp
+}
+
+input appointments_bool_exp {
+  _and: [appointments_bool_exp!]
+  _not: appointments_bool_exp
+  _or: [appointments_bool_exp!]
+  id: uuid_comparison_exp
+  tenant_id: uuid_comparison_exp
+  patient_id: uuid_comparison_exp
+  professional_id: uuid_comparison_exp
+  title: String_comparison_exp
+  description: String_comparison_exp
+  start_datetime: timestamptz_comparison_exp
+  end_datetime: timestamptz_comparison_exp
+  status: String_comparison_exp
+  service_type: String_comparison_exp
+  notes: String_comparison_exp
+  created_by: uuid_comparison_exp
+  created_at: timestamptz_comparison_exp
+  updated_at: timestamptz_comparison_exp
+}
+
+input professionals_bool_exp {
+  _and: [professionals_bool_exp!]
+  _not: professionals_bool_exp
+  _or: [professionals_bool_exp!]
+  id: uuid_comparison_exp
+  tenant_id: uuid_comparison_exp
+  name: String_comparison_exp
+  registration_number: String_comparison_exp
+  specialty: String_comparison_exp
+  phone: String_comparison_exp
+  email: String_comparison_exp
+  working_hours: jsonb_comparison_exp
+  is_active: Boolean_comparison_exp
+  created_at: timestamptz_comparison_exp
+  updated_at: timestamptz_comparison_exp
+}
+
+input materials_bool_exp {
+  _and: [materials_bool_exp!]
+  _not: materials_bool_exp
+  _or: [materials_bool_exp!]
+  id: uuid_comparison_exp
+  tenant_id: uuid_comparison_exp
+  category_id: uuid_comparison_exp
+  name: String_comparison_exp
+  brand: String_comparison_exp
+  description: String_comparison_exp
+  unit_type: String_comparison_exp
+  min_stock_level: Int_comparison_exp
+  max_stock_level: Int_comparison_exp
+  current_stock: Int_comparison_exp
+  unit_cost: numeric_comparison_exp
+  supplier_name: String_comparison_exp
+  supplier_contact: String_comparison_exp
+  is_active: Boolean_comparison_exp
+  created_at: timestamptz_comparison_exp
+  updated_at: timestamptz_comparison_exp
+}
+
+input material_categories_bool_exp {
+  _and: [material_categories_bool_exp!]
+  _not: material_categories_bool_exp
+  _or: [material_categories_bool_exp!]
+  id: uuid_comparison_exp
+  tenant_id: uuid_comparison_exp
+  name: String_comparison_exp
+  description: String_comparison_exp
+  is_active: Boolean_comparison_exp
+  created_at: timestamptz_comparison_exp
+  updated_at: timestamptz_comparison_exp
+}
+
+input material_entries_bool_exp {
+  _and: [material_entries_bool_exp!]
+  _not: material_entries_bool_exp
+  _or: [material_entries_bool_exp!]
+  id: uuid_comparison_exp
+  tenant_id: uuid_comparison_exp
+  material_id: uuid_comparison_exp
+  entry_type: String_comparison_exp
+  quantity: Int_comparison_exp
+  unit_cost: numeric_comparison_exp
+  total_cost: numeric_comparison_exp
+  expiry_date: date_comparison_exp
+  batch_number: String_comparison_exp
+  supplier_name: String_comparison_exp
+  invoice_number: String_comparison_exp
+  notes: String_comparison_exp
+  created_by: uuid_comparison_exp
+  created_at: timestamptz_comparison_exp
+}
+
+input waiting_list_bool_exp {
+  _and: [waiting_list_bool_exp!]
+  _not: waiting_list_bool_exp
+  _or: [waiting_list_bool_exp!]
+  id: uuid_comparison_exp
+  tenant_id: uuid_comparison_exp
+  patient_id: uuid_comparison_exp
+  professional_id: uuid_comparison_exp
+  preferred_date: date_comparison_exp
+  priority: Int_comparison_exp
+  status: String_comparison_exp
+  notes: String_comparison_exp
+  created_at: timestamptz_comparison_exp
+  updated_at: timestamptz_comparison_exp
+}
+
+input anamnesis_templates_bool_exp {
+  _and: [anamnesis_templates_bool_exp!]
+  _not: anamnesis_templates_bool_exp
+  _or: [anamnesis_templates_bool_exp!]
+  id: uuid_comparison_exp
+  tenant_id: uuid_comparison_exp
+  name: String_comparison_exp
+  description: String_comparison_exp
+  sections: jsonb_comparison_exp
+  is_active: Boolean_comparison_exp
+  is_default: Boolean_comparison_exp
+  created_by: uuid_comparison_exp
+  created_at: timestamptz_comparison_exp
+  updated_at: timestamptz_comparison_exp
+}
+
+input anamnesis_forms_bool_exp {
+  _and: [anamnesis_forms_bool_exp!]
+  _not: anamnesis_forms_bool_exp
+  _or: [anamnesis_forms_bool_exp!]
+  id: uuid_comparison_exp
+  tenant_id: uuid_comparison_exp
+  patient_id: uuid_comparison_exp
+  appointment_id: uuid_comparison_exp
+  template_id: uuid_comparison_exp
+  form_token: String_comparison_exp
+  form_data: jsonb_comparison_exp
+  status: String_comparison_exp
+  alerts_detected: jsonb_comparison_exp
+  expires_at: timestamptz_comparison_exp
+  completed_at: timestamptz_comparison_exp
+  sent_at: timestamptz_comparison_exp
+  created_at: timestamptz_comparison_exp
+  updated_at: timestamptz_comparison_exp
+}
+
+input tenants_bool_exp {
+  _and: [tenants_bool_exp!]
+  _not: tenants_bool_exp
+  _or: [tenants_bool_exp!]
+  id: uuid_comparison_exp
+  name: String_comparison_exp
+  subdomain: String_comparison_exp
+  logo_url: String_comparison_exp
+  primary_color: String_comparison_exp
+  secondary_color: String_comparison_exp
+  is_active: Boolean_comparison_exp
+  plan_id: uuid_comparison_exp
+  subscription_status: String_comparison_exp
+  trial_ends_at: timestamptz_comparison_exp
+  subscription_starts_at: timestamptz_comparison_exp
+  subscription_ends_at: timestamptz_comparison_exp
+  billing_email: String_comparison_exp
+  billing_address: jsonb_comparison_exp
+  created_at: timestamptz_comparison_exp
+  updated_at: timestamptz_comparison_exp
+}
+
+input subscription_plans_bool_exp {
+  _and: [subscription_plans_bool_exp!]
+  _not: subscription_plans_bool_exp
+  _or: [subscription_plans_bool_exp!]
+  id: uuid_comparison_exp
+  name: String_comparison_exp
+  description: String_comparison_exp
+  price_monthly: numeric_comparison_exp
+  price_yearly: numeric_comparison_exp
+  max_users: Int_comparison_exp
+  max_patients: Int_comparison_exp
+  max_appointments_per_month: Int_comparison_exp
+  features: jsonb_comparison_exp
+  is_active: Boolean_comparison_exp
+  is_popular: Boolean_comparison_exp
+  sort_order: Int_comparison_exp
+  created_at: timestamptz_comparison_exp
+  updated_at: timestamptz_comparison_exp
+}
+
+input feature_flags_bool_exp {
+  _and: [feature_flags_bool_exp!]
+  _not: feature_flags_bool_exp
+  _or: [feature_flags_bool_exp!]
+  id: uuid_comparison_exp
+  key: String_comparison_exp
+  name: String_comparison_exp
+  description: String_comparison_exp
+  category: String_comparison_exp
+  is_premium: Boolean_comparison_exp
+  created_at: timestamptz_comparison_exp
+  updated_at: timestamptz_comparison_exp
+}
+
+# Tipos de ordenação
+input patients_order_by {
+  id: order_by
+  tenant_id: order_by
+  name: order_by
+  phone: order_by
+  email: order_by
+  cpf: order_by
+  birth_date: order_by
+  address: order_by
+  emergency_contact: order_by
+  medical_history: order_by
+  is_active: order_by
+  created_at: order_by
+  updated_at: order_by
+}
+
+input appointments_order_by {
+  id: order_by
+  tenant_id: order_by
+  patient_id: order_by
+  professional_id: order_by
+  title: order_by
+  description: order_by
+  start_datetime: order_by
+  end_datetime: order_by
+  status: order_by
+  service_type: order_by
+  notes: order_by
+  created_by: order_by
+  created_at: order_by
+  updated_at: order_by
+}
+
+input professionals_order_by {
+  id: order_by
+  tenant_id: order_by
+  name: order_by
+  registration_number: order_by
+  specialty: order_by
+  phone: order_by
+  email: order_by
+  working_hours: order_by
+  is_active: order_by
+  created_at: order_by
+  updated_at: order_by
+}
+
+input materials_order_by {
+  id: order_by
+  tenant_id: order_by
+  category_id: order_by
+  name: order_by
+  brand: order_by
+  description: order_by
+  unit_type: order_by
+  min_stock_level: order_by
+  max_stock_level: order_by
+  current_stock: order_by
+  unit_cost: order_by
+  supplier_name: order_by
+  supplier_contact: order_by
+  is_active: order_by
+  created_at: order_by
+  updated_at: order_by
+}
+
+input material_entries_order_by {
+  id: order_by
+  tenant_id: order_by
+  material_id: order_by
+  entry_type: order_by
+  quantity: order_by
+  unit_cost: order_by
+  total_cost: order_by
+  expiry_date: order_by
+  batch_number: order_by
+  supplier_name: order_by
+  invoice_number: order_by
+  notes: order_by
+  created_by: order_by
+  created_at: order_by
+}
+
+input waiting_list_order_by {
+  id: order_by
+  tenant_id: order_by
+  patient_id: order_by
+  professional_id: order_by
+  preferred_date: order_by
+  priority: order_by
+  status: order_by
+  notes: order_by
+  created_at: order_by
+  updated_at: order_by
+}
+
+input anamnesis_templates_order_by {
+  id: order_by
+  tenant_id: order_by
+  name: order_by
+  description: order_by
+  sections: order_by
+  is_active: order_by
+  is_default: order_by
+  created_by: order_by
+  created_at: order_by
+  updated_at: order_by
+}
+
+input anamnesis_forms_order_by {
+  id: order_by
+  tenant_id: order_by
+  patient_id: order_by
+  appointment_id: order_by
+  template_id: order_by
+  form_token: order_by
+  form_data: order_by
+  status: order_by
+  alerts_detected: order_by
+  expires_at: order_by
+  completed_at: order_by
+  sent_at: order_by
+  created_at: order_by
+  updated_at: order_by
+}
+
+input tenants_order_by {
+  id: order_by
+  name: order_by
+  subdomain: order_by
+  logo_url: order_by
+  primary_color: order_by
+  secondary_color: order_by
+  is_active: order_by
+  plan_id: order_by
+  subscription_status: order_by
+  trial_ends_at: order_by
+  subscription_starts_at: order_by
+  subscription_ends_at: order_by
+  billing_email: order_by
+  billing_address: order_by
+  created_at: order_by
+  updated_at: order_by
+}
+
+input subscription_plans_order_by {
+  id: order_by
+  name: order_by
+  description: order_by
+  price_monthly: order_by
+  price_yearly: order_by
+  max_users: order_by
+  max_patients: order_by
+  max_appointments_per_month: order_by
+  features: order_by
+  is_active: order_by
+  is_popular: order_by
+  sort_order: order_by
+  created_at: order_by
+  updated_at: order_by
+}
+
+input feature_flags_order_by {
+  id: order_by
+  key: order_by
+  name: order_by
+  description: order_by
+  category: order_by
+  is_premium: order_by
+  created_at: order_by
+  updated_at: order_by
+}
+
+# Tipos de inserção
+input patients_insert_input {
+  id: uuid
+  tenant_id: uuid!
+  name: String!
+  phone: String
+  email: String
+  cpf: String
+  birth_date: date
+  address: String
+  emergency_contact: String
+  medical_history: String
+  is_active: Boolean
+}
+
+input appointments_insert_input {
+  id: uuid
+  tenant_id: uuid!
+  patient_id: uuid!
+  professional_id: uuid!
+  title: String!
+  description: String
+  start_datetime: timestamptz!
+  end_datetime: timestamptz!
+  status: appointment_status_enum
+  service_type: String
+  notes: String
+  created_by: uuid
+}
+
+input professionals_insert_input {
+  id: uuid
+  tenant_id: uuid!
+  name: String!
+  registration_number: String
+  specialty: String
+  phone: String
+  email: String
+  working_hours: jsonb
+  is_active: Boolean
+}
+
+input materials_insert_input {
+  id: uuid
+  tenant_id: uuid!
+  category_id: uuid
+  name: String!
+  brand: String
+  description: String
+  unit_type: String
+  min_stock_level: Int
+  max_stock_level: Int
+  current_stock: Int
+  unit_cost: numeric
+  supplier_name: String
+  supplier_contact: String
+  is_active: Boolean
+}
+
+input material_categories_insert_input {
+  id: uuid
+  tenant_id: uuid!
+  name: String!
+  description: String
+  is_active: Boolean
+}
+
+input material_entries_insert_input {
+  id: uuid
+  tenant_id: uuid!
+  material_id: uuid!
+  entry_type: entry_type_enum!
+  quantity: Int!
+  unit_cost: numeric
+  total_cost: numeric
+  expiry_date: date
+  batch_number: String
+  supplier_name: String
+  invoice_number: String
+  notes: String
+  created_by: uuid
+}
+
+input waiting_list_insert_input {
+  id: uuid
+  tenant_id: uuid!
+  patient_id: uuid!
+  professional_id: uuid
+  preferred_date: date
+  preferred_time_start: time
+  preferred_time_end: time
+  priority: Int
+  status: waiting_list_status_enum
+  notes: String
+}
+
+input anamnesis_templates_insert_input {
+  id: uuid
+  tenant_id: uuid!
+  name: String!
+  description: String
+  sections: jsonb!
+  is_active: Boolean
+  is_default: Boolean
+  created_by: uuid
+}
+
+input anamnesis_forms_insert_input {
+  id: uuid
+  tenant_id: uuid!
+  patient_id: uuid!
+  appointment_id: uuid
+  template_id: uuid!
+  form_token: String!
+  form_data: jsonb
+  status: anamnesis_status_enum
+  alerts_detected: jsonb
+  expires_at: timestamptz
+  completed_at: timestamptz
+  sent_at: timestamptz
+}
+
+input tenants_insert_input {
+  id: uuid
+  name: String!
+  subdomain: String
+  logo_url: String
+  primary_color: String
+  secondary_color: String
+  is_active: Boolean
+  plan_id: uuid
+  subscription_status: subscription_status_enum
+  trial_ends_at: timestamptz
+  subscription_starts_at: timestamptz
+  subscription_ends_at: timestamptz
+  billing_email: String
+  billing_address: jsonb
+}
+
+input subscription_plans_insert_input {
+  id: uuid
+  name: String!
+  description: String
+  price_monthly: numeric!
+  price_yearly: numeric
+  max_users: Int
+  max_patients: Int
+  max_appointments_per_month: Int
+  features: jsonb
+  is_active: Boolean
+  is_popular: Boolean
+  sort_order: Int
+}
+
+input feature_flags_insert_input {
+  id: uuid
+  key: String!
+  name: String!
+  description: String
+  category: String
+  is_premium: Boolean
+}
+
+input plan_features_insert_input {
+  id: uuid
+  plan_id: uuid!
+  feature_flag_id: uuid!
+  is_enabled: Boolean
+  limits: jsonb
+}
+
+input tenant_feature_overrides_insert_input {
+  id: uuid
+  tenant_id: uuid!
+  feature_flag_id: uuid!
+  is_enabled: Boolean!
+  limits: jsonb
+  expires_at: timestamptz
+  reason: String
+  created_by: uuid
+}
+
+input billing_history_insert_input {
+  id: uuid
+  tenant_id: uuid!
+  plan_id: uuid
+  amount: numeric!
+  currency: String
+  billing_period_start: timestamptz!
+  billing_period_end: timestamptz!
+  status: billing_status_enum
+  payment_method: String
+  external_payment_id: String
+  invoice_url: String
+}
+
+# Tipos de atualização
+input patients_set_input {
+  name: String
+  phone: String
+  email: String
+  cpf: String
+  birth_date: date
+  address: String
+  emergency_contact: String
+  medical_history: String
+  is_active: Boolean
+  updated_at: timestamptz
+}
+
+input appointments_set_input {
+  patient_id: uuid
+  professional_id: uuid
+  title: String
+  description: String
+  start_datetime: timestamptz
+  end_datetime: timestamptz
+  status: appointment_status_enum
+  service_type: String
+  notes: String
+  updated_at: timestamptz
+}
+
+input professionals_set_input {
+  name: String
+  registration_number: String
+  specialty: String
+  phone: String
+  email: String
+  working_hours: jsonb
+  is_active: Boolean
+  updated_at: timestamptz
+}
+
+input materials_set_input {
+  category_id: uuid
+  name: String
+  brand: String
+  description: String
+  unit_type: String
+  min_stock_level: Int
+  max_stock_level: Int
+  current_stock: Int
+  unit_cost: numeric
+  supplier_name: String
+  supplier_contact: String
+  is_active: Boolean
+  updated_at: timestamptz
+}
+
+input material_categories_set_input {
+  name: String
+  description: String
+  is_active: Boolean
+  updated_at: timestamptz
+}
+
+input waiting_list_set_input {
+  patient_id: uuid
+  professional_id: uuid
+  preferred_date: date
+  preferred_time_start: time
+  preferred_time_end: time
+  priority: Int
+  status: waiting_list_status_enum
+  notes: String
+  updated_at: timestamptz
+}
+
+input anamnesis_templates_set_input {
+  name: String
+  description: String
+  sections: jsonb
+  is_active: Boolean
+  is_default: Boolean
+  updated_at: timestamptz
+}
+
+input anamnesis_forms_set_input {
+  patient_id: uuid
+  appointment_id: uuid
+  template_id: uuid
+  form_token: String
+  form_data: jsonb
+  status: anamnesis_status_enum
+  alerts_detected: jsonb
+  expires_at: timestamptz
+  completed_at: timestamptz
+  sent_at: timestamptz
+  updated_at: timestamptz
+}
+
+input tenants_set_input {
+  name: String
+  subdomain: String
+  logo_url: String
+  primary_color: String
+  secondary_color: String
+  is_active: Boolean
+  plan_id: uuid
+  subscription_status: subscription_status_enum
+  trial_ends_at: timestamptz
+  subscription_starts_at: timestamptz
+  subscription_ends_at: timestamptz
+  billing_email: String
+  billing_address: jsonb
+  updated_at: timestamptz
+}
+
+input subscription_plans_set_input {
+  name: String
+  description: String
+  price_monthly: numeric
+  price_yearly: numeric
+  max_users: Int
+  max_patients: Int
+  max_appointments_per_month: Int
+  features: jsonb
+  is_active: Boolean
+  is_popular: Boolean
+  sort_order: Int
+  updated_at: timestamptz
+}
+
+input feature_flags_set_input {
+  key: String
+  name: String
+  description: String
+  category: String
+  is_premium: Boolean
+  updated_at: timestamptz
+}
+
+input plan_features_on_conflict {
+  constraint: String!
+  update_columns: [String!]!
+}
+
+# Root types
+type Query {
+  # Pacientes
+  patients(limit: Int, offset: Int, where: patients_bool_exp, order_by: [patients_order_by!]): [patients!]!
+  patients_by_pk(id: uuid!): patients
+  patients_aggregate(where: patients_bool_exp): patients_aggregate!
+  
+  # Agendamentos
+  appointments(limit: Int, offset: Int, where: appointments_bool_exp, order_by: [appointments_order_by!]): [appointments!]!
+  appointments_by_pk(id: uuid!): appointments
+  appointments_aggregate(where: appointments_bool_exp): appointments_aggregate!
+  
+  # Profissionais
+  professionals(limit: Int, offset: Int, where: professionals_bool_exp, order_by: [professionals_order_by!]): [professionals!]!
+  professionals_by_pk(id: uuid!): professionals
+  professionals_aggregate(where: professionals_bool_exp): professionals_aggregate!
+  
+  # Materiais
+  materials(limit: Int, offset: Int, where: materials_bool_exp, order_by: [materials_order_by!]): [materials!]!
+  materials_by_pk(id: uuid!): materials
+  materials_aggregate(where: materials_bool_exp): materials_aggregate!
+  
+  material_categories(where: material_categories_bool_exp, order_by: [String!]): [material_categories!]!
+  material_categories_by_pk(id: uuid!): material_categories
+  
+  material_entries(limit: Int, offset: Int, where: material_entries_bool_exp, order_by: [material_entries_order_by!]): [material_entries!]!
+  material_entries_by_pk(id: uuid!): material_entries
+  material_entries_aggregate(where: material_entries_bool_exp): material_entries_aggregate!
+  
+  # Lista de espera
+  waiting_list(limit: Int, offset: Int, where: waiting_list_bool_exp, order_by: [waiting_list_order_by!]): [waiting_list!]!
+  waiting_list_by_pk(id: uuid!): waiting_list
+  waiting_list_aggregate(where: waiting_list_bool_exp): waiting_list_aggregate!
+  
+  # Anamnese
+  anamnesis_templates(limit: Int, offset: Int, where: anamnesis_templates_bool_exp, order_by: [anamnesis_templates_order_by!]): [anamnesis_templates!]!
+  anamnesis_templates_by_pk(id: uuid!): anamnesis_templates
+  anamnesis_templates_aggregate(where: anamnesis_templates_bool_exp): anamnesis_templates_aggregate!
+  
+  anamnesis_forms(limit: Int, offset: Int, where: anamnesis_forms_bool_exp, order_by: [anamnesis_forms_order_by!]): [anamnesis_forms!]!
+  anamnesis_forms_by_pk(id: uuid!): anamnesis_forms
+  anamnesis_forms_aggregate(where: anamnesis_forms_bool_exp): anamnesis_forms_aggregate!
+  
+  # Tenants e Super Admin
+  tenants(limit: Int, offset: Int, where: tenants_bool_exp, order_by: [tenants_order_by!]): [tenants!]!
+  tenants_by_pk(id: uuid!): tenants
+  tenants_aggregate(where: tenants_bool_exp): tenants_aggregate!
+  
+  subscription_plans(where: subscription_plans_bool_exp, order_by: [subscription_plans_order_by!]): [subscription_plans!]!
+  subscription_plans_by_pk(id: uuid!): subscription_plans
+  
+  feature_flags(where: feature_flags_bool_exp, order_by: [feature_flags_order_by!]): [feature_flags!]!
+  feature_flags_by_pk(id: uuid!): feature_flags
+  
+  plan_features(where: String): [plan_features!]!
+  tenant_feature_overrides(where: String): [tenant_feature_overrides!]!
+  tenant_usage(where: String, order_by: [String!]): [tenant_usage!]!
+  billing_history(where: String, limit: Int, offset: Int, order_by: [String!]): [billing_history!]!
+}
+
+type Mutation {
+  # Pacientes
+  insert_patients_one(object: patients_insert_input!): patients
+  update_patients_by_pk(pk_columns: String!, _set: patients_set_input!): patients
+  delete_patients_by_pk(id: uuid!): patients
+  
+  # Agendamentos
+  insert_appointments_one(object: appointments_insert_input!): appointments
+  update_appointments_by_pk(pk_columns: String!, _set: appointments_set_input!): appointments
+  delete_appointments_by_pk(id: uuid!): appointments
+  
+  # Profissionais
+  insert_professionals_one(object: professionals_insert_input!): professionals
+  update_professionals_by_pk(pk_columns: String!, _set: professionals_set_input!): professionals
+  delete_professionals_by_pk(id: uuid!): professionals
+  
+  # Materiais
+  insert_materials_one(object: materials_insert_input!): materials
+  update_materials_by_pk(pk_columns: String!, _set: materials_set_input!): materials
+  delete_materials_by_pk(id: uuid!): materials
+  
+  insert_material_categories_one(object: material_categories_insert_input!): material_categories
+  insert_material_entries_one(object: material_entries_insert_input!): material_entries
+  
+  # Lista de espera
+  insert_waiting_list_one(object: waiting_list_insert_input!): waiting_list
+  update_waiting_list_by_pk(pk_columns: String!, _set: waiting_list_set_input!): waiting_list
+  delete_waiting_list_by_pk(id: uuid!): waiting_list
+  
+  # Anamnese
+  insert_anamnesis_templates_one(object: anamnesis_templates_insert_input!): anamnesis_templates
+  update_anamnesis_templates_by_pk(pk_columns: String!, _set: anamnesis_templates_set_input!): anamnesis_templates
+  delete_anamnesis_templates_by_pk(id: uuid!): anamnesis_templates
+  
+  insert_anamnesis_forms_one(object: anamnesis_forms_insert_input!): anamnesis_forms
+  update_anamnesis_forms_by_pk(pk_columns: String!, _set: anamnesis_forms_set_input!): anamnesis_forms
+  delete_anamnesis_forms_by_pk(id: uuid!): anamnesis_forms
+  
+  # Super Admin
+  insert_subscription_plans_one(object: subscription_plans_insert_input!): subscription_plans
+  update_subscription_plans_by_pk(pk_columns: String!, _set: subscription_plans_set_input!): subscription_plans
+  
+  insert_feature_flags_one(object: feature_flags_insert_input!): feature_flags
+  update_feature_flags_by_pk(pk_columns: String!, _set: feature_flags_set_input!): feature_flags
+  
+  insert_plan_features_one(object: plan_features_insert_input!, on_conflict: plan_features_on_conflict!): plan_features
+  insert_tenant_feature_overrides_one(object: tenant_feature_overrides_insert_input!): tenant_feature_overrides
+  
+  update_tenants_by_pk(pk_columns: String!, _set: tenants_set_input!): tenants
+  insert_billing_history_one(object: billing_history_insert_input!): billing_history
+}
+
+type Subscription {
+  # Subscriptions em tempo real
+  patients(where: patients_bool_exp, order_by: [patients_order_by!]): [patients!]!
+  appointments(where: appointments_bool_exp, order_by: [appointments_order_by!]): [appointments!]!
+  professionals(where: professionals_bool_exp, order_by: [professionals_order_by!]): [professionals!]!
+  materials(where: materials_bool_exp, order_by: [materials_order_by!]): [materials!]!
+  waiting_list(where: waiting_list_bool_exp, order_by: [waiting_list_order_by!]): [waiting_list!]!
+  anamnesis_forms(where: anamnesis_forms_bool_exp, order_by: [anamnesis_forms_order_by!]): [anamnesis_forms!]!
+  tenants(where: tenants_bool_exp, order_by: [tenants_order_by!]): [tenants!]!
+}

@@ -1,0 +1,46 @@
+[build]
+  publish = "dist"
+  command = "npm run build"
+
+[build.environment]
+  NODE_VERSION = "18"
+  NPM_VERSION = "9"
+
+# Configurações de redirecionamento para SPA
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+# Headers de segurança
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-XSS-Protection = "1; mode=block"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    Permissions-Policy = "camera=(), microphone=(), geolocation=()"
+
+# Cache para assets estáticos
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+# Configurações de contexto para diferentes ambientes
+[context.production.environment]
+  VITE_APP_ENV = "production"
+  VITE_DEBUG_MODE = "false"
+  VITE_ENABLE_APOLLO_DEVTOOLS = "false"
+  VITE_ENABLE_PERFORMANCE_MONITORING = "true"
+
+[context.deploy-preview.environment]
+  VITE_APP_ENV = "staging"
+  VITE_DEBUG_MODE = "true"
+  VITE_ENABLE_APOLLO_DEVTOOLS = "true"
+
+[context.branch-deploy.environment]
+  VITE_APP_ENV = "development"
+  VITE_DEBUG_MODE = "true"
+  VITE_ENABLE_APOLLO_DEVTOOLS = "true"

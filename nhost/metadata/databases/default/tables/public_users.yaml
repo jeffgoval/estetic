@@ -1,0 +1,128 @@
+table:
+  name: users
+  schema: public
+object_relationships:
+  - name: tenant
+    using:
+      foreign_key_constraint_on: tenant_id
+array_relationships:
+  - name: created_appointments
+    using:
+      foreign_key_constraint_on:
+        column: created_by
+        table:
+          name: appointments
+          schema: public
+  - name: created_material_entries
+    using:
+      foreign_key_constraint_on:
+        column: created_by
+        table:
+          name: material_entries
+          schema: public
+select_permissions:
+  - role: user
+    permission:
+      columns:
+        - id
+        - tenant_id
+        - email
+        - display_name
+        - role
+        - is_active
+        - last_login_at
+        - created_at
+        - updated_at
+      filter:
+        tenant_id:
+          _eq: X-Hasura-Tenant-Id
+  - role: super_admin
+    permission:
+      columns:
+        - id
+        - tenant_id
+        - email
+        - display_name
+        - role
+        - is_active
+        - is_super_admin
+        - last_login_at
+        - created_at
+        - updated_at
+      filter: {}
+insert_permissions:
+  - role: owner
+    permission:
+      columns:
+        - tenant_id
+        - email
+        - display_name
+        - role
+        - is_active
+      filter: {}
+      check:
+        tenant_id:
+          _eq: X-Hasura-Tenant-Id
+  - role: admin
+    permission:
+      columns:
+        - tenant_id
+        - email
+        - display_name
+        - role
+        - is_active
+      filter: {}
+      check:
+        _and:
+          - tenant_id:
+              _eq: X-Hasura-Tenant-Id
+          - role:
+              _in: [user, professional, receptionist]
+update_permissions:
+  - role: user
+    permission:
+      columns:
+        - display_name
+        - last_login_at
+      filter:
+        _and:
+          - tenant_id:
+              _eq: X-Hasura-Tenant-Id
+          - id:
+              _eq: X-Hasura-User-Id
+      check:
+        _and:
+          - tenant_id:
+              _eq: X-Hasura-Tenant-Id
+          - id:
+              _eq: X-Hasura-User-Id
+  - role: owner
+    permission:
+      columns:
+        - display_name
+        - role
+        - is_active
+      filter:
+        tenant_id:
+          _eq: X-Hasura-Tenant-Id
+      check:
+        tenant_id:
+          _eq: X-Hasura-Tenant-Id
+  - role: admin
+    permission:
+      columns:
+        - display_name
+        - role
+        - is_active
+      filter:
+        _and:
+          - tenant_id:
+              _eq: X-Hasura-Tenant-Id
+          - role:
+              _neq: owner
+      check:
+        _and:
+          - tenant_id:
+              _eq: X-Hasura-Tenant-Id
+          - role:
+              _in: [user, professional, receptionist, admin]

@@ -1,0 +1,207 @@
+# Queries para Agendamentos
+query GetAppointments($limit: Int, $offset: Int, $where: appointments_bool_exp, $order_by: [appointments_order_by!]) {
+  appointments(
+    limit: $limit
+    offset: $offset
+    where: $where
+    order_by: $order_by
+  ) {
+    id
+    tenant_id
+    patient_id
+    professional_id
+    title
+    description
+    start_datetime
+    end_datetime
+    status
+    service_type
+    notes
+    created_by
+    created_at
+    updated_at
+    patient {
+      id
+      name
+      phone
+      email
+    }
+    professional {
+      id
+      name
+      specialty
+    }
+  }
+  appointments_aggregate(where: $where) {
+    aggregate {
+      count
+    }
+  }
+}
+
+query GetAppointment($id: uuid!) {
+  appointments_by_pk(id: $id) {
+    id
+    tenant_id
+    patient_id
+    professional_id
+    title
+    description
+    start_datetime
+    end_datetime
+    status
+    service_type
+    notes
+    created_by
+    created_at
+    updated_at
+    patient {
+      id
+      name
+      phone
+      email
+    }
+    professional {
+      id
+      name
+      specialty
+    }
+  }
+}
+
+query GetAppointmentsByDateRange($start_date: timestamptz!, $end_date: timestamptz!, $where: appointments_bool_exp!) {
+  appointments(
+    where: {
+      _and: [
+        { start_datetime: { _gte: $start_date } },
+        { start_datetime: { _lte: $end_date } },
+        $where
+      ]
+    }
+    order_by: { start_datetime: asc }
+  ) {
+    id
+    tenant_id
+    patient_id
+    professional_id
+    title
+    description
+    start_datetime
+    end_datetime
+    status
+    service_type
+    notes
+    created_by
+    created_at
+    updated_at
+    patient {
+      id
+      name
+      phone
+      email
+    }
+    professional {
+      id
+      name
+      specialty
+    }
+  }
+}
+
+# Mutations para Agendamentos
+mutation CreateAppointment($object: appointments_insert_input!) {
+  insert_appointments_one(object: $object) {
+    id
+    tenant_id
+    patient_id
+    professional_id
+    title
+    description
+    start_datetime
+    end_datetime
+    status
+    service_type
+    notes
+    created_by
+    created_at
+    updated_at
+    patient {
+      id
+      name
+      phone
+      email
+    }
+    professional {
+      id
+      name
+      specialty
+    }
+  }
+}
+
+mutation UpdateAppointment($id: uuid!, $changes: appointments_set_input!) {
+  update_appointments_by_pk(pk_columns: $id, _set: $changes) {
+    id
+    tenant_id
+    patient_id
+    professional_id
+    title
+    description
+    start_datetime
+    end_datetime
+    status
+    service_type
+    notes
+    created_by
+    created_at
+    updated_at
+    patient {
+      id
+      name
+      phone
+      email
+    }
+    professional {
+      id
+      name
+      specialty
+    }
+  }
+}
+
+mutation DeleteAppointment($id: uuid!) {
+  delete_appointments_by_pk(id: $id) {
+    id
+  }
+}
+
+# Subscription para atualizações em tempo real
+subscription AppointmentsSubscription($where: appointments_bool_exp) {
+  appointments(where: $where, order_by: { start_datetime: asc }) {
+    id
+    tenant_id
+    patient_id
+    professional_id
+    title
+    description
+    start_datetime
+    end_datetime
+    status
+    service_type
+    notes
+    created_by
+    created_at
+    updated_at
+    patient {
+      id
+      name
+      phone
+      email
+    }
+    professional {
+      id
+      name
+      specialty
+    }
+  }
+}

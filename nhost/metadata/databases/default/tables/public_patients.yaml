@@ -1,0 +1,97 @@
+table:
+  name: patients
+  schema: public
+object_relationships:
+  - name: tenant
+    using:
+      foreign_key_constraint_on: tenant_id
+array_relationships:
+  - name: appointments
+    using:
+      foreign_key_constraint_on:
+        column: patient_id
+        table:
+          name: appointments
+          schema: public
+  - name: waiting_list_entries
+    using:
+      foreign_key_constraint_on:
+        column: patient_id
+        table:
+          name: waiting_list
+          schema: public
+  - name: anamnesis_forms
+    using:
+      foreign_key_constraint_on:
+        column: patient_id
+        table:
+          name: anamnesis_forms
+          schema: public
+select_permissions:
+  - role: user
+    permission:
+      columns:
+        - id
+        - tenant_id
+        - name
+        - phone
+        - email
+        - cpf
+        - birth_date
+        - address
+        - emergency_contact
+        - medical_history
+        - is_active
+        - created_at
+        - updated_at
+      filter:
+        tenant_id:
+          _eq: X-Hasura-Tenant-Id
+insert_permissions:
+  - role: user
+    permission:
+      columns:
+        - tenant_id
+        - name
+        - phone
+        - email
+        - cpf
+        - birth_date
+        - address
+        - emergency_contact
+        - medical_history
+        - is_active
+      filter: {}
+      check:
+        tenant_id:
+          _eq: X-Hasura-Tenant-Id
+update_permissions:
+  - role: user
+    permission:
+      columns:
+        - name
+        - phone
+        - email
+        - cpf
+        - birth_date
+        - address
+        - emergency_contact
+        - medical_history
+        - is_active
+      filter:
+        tenant_id:
+          _eq: X-Hasura-Tenant-Id
+      check:
+        tenant_id:
+          _eq: X-Hasura-Tenant-Id
+delete_permissions:
+  - role: admin
+    permission:
+      filter:
+        tenant_id:
+          _eq: X-Hasura-Tenant-Id
+  - role: owner
+    permission:
+      filter:
+        tenant_id:
+          _eq: X-Hasura-Tenant-Id

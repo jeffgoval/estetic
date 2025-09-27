@@ -1,0 +1,94 @@
+# Configurações de Segurança para Produção
+
+## Headers de Segurança Implementados
+
+### Content Security Policy (CSP)
+- Implementado via meta tag no index.html
+- Restringe fontes de scripts, estilos e recursos
+
+### X-Frame-Options
+- Valor: DENY
+- Previne ataques de clickjacking
+
+### X-XSS-Protection
+- Valor: 1; mode=block
+- Ativa proteção contra XSS no navegador
+
+### X-Content-Type-Options
+- Valor: nosniff
+- Previne MIME type sniffing
+
+### Referrer-Policy
+- Valor: strict-origin-when-cross-origin
+- Controla informações de referrer enviadas
+
+### Permissions-Policy
+- Restringe acesso a APIs sensíveis (camera, microphone, geolocation)
+
+## Configurações de Autenticação
+
+### OAuth 2.0 com Google
+- Implementado via Nhost Auth
+- Redirect URIs restritas ao domínio de produção
+- Client secrets armazenados como variáveis de ambiente
+
+### JWT Tokens
+- Gerenciados automaticamente pelo Nhost
+- Refresh tokens com rotação automática
+- Expiração configurada para 15 minutos (access token)
+
+## Configurações de Banco de Dados
+
+### Row Level Security (RLS)
+- Ativado em todas as tabelas multi-tenant
+- Políticas baseadas no tenant_id do usuário
+- Isolamento completo entre tenants
+
+### Permissões do Hasura
+- Configuradas por role (user, professional, admin, owner, super_admin)
+- Acesso restrito baseado em relacionamentos
+- Validação de entrada em todas as mutations
+
+## Monitoramento de Segurança
+
+### Logs de Auditoria
+- Todas as operações sensíveis são logadas
+- Logs incluem user_id, tenant_id, timestamp e ação
+- Retenção de logs por 90 dias
+
+### Detecção de Anomalias
+- Monitoramento de tentativas de login falhadas
+- Alertas para acessos de IPs suspeitos
+- Bloqueio automático após múltiplas tentativas
+
+## Backup e Recuperação
+
+### Backup Automático
+- Backup diário do banco de dados
+- Retenção de 30 dias
+- Backup criptografado
+
+### Plano de Recuperação
+- RTO (Recovery Time Objective): 4 horas
+- RPO (Recovery Point Objective): 24 horas
+- Testes de recuperação mensais
+
+## Compliance
+
+### LGPD (Lei Geral de Proteção de Dados)
+- Consentimento explícito para coleta de dados
+- Direito ao esquecimento implementado
+- Portabilidade de dados disponível
+- DPO (Data Protection Officer) designado
+
+### Criptografia
+- HTTPS obrigatório (TLS 1.3)
+- Dados sensíveis criptografados em repouso
+- Chaves de criptografia rotacionadas mensalmente
+
+## Contato de Segurança
+
+Para reportar vulnerabilidades de segurança:
+- Email: security@suaempresa.com
+- Prazo de resposta: 24 horas
+- Programa de bug bounty disponível

@@ -1,0 +1,63 @@
+table:
+  name: feature_flags
+  schema: public
+array_relationships:
+  - name: plan_features
+    using:
+      foreign_key_constraint_on:
+        column: feature_flag_id
+        table:
+          name: plan_features
+          schema: public
+  - name: tenant_overrides
+    using:
+      foreign_key_constraint_on:
+        column: feature_flag_id
+        table:
+          name: tenant_feature_overrides
+          schema: public
+select_permissions:
+  - role: user
+    permission:
+      columns:
+        - id
+        - key
+        - name
+        - description
+        - category
+        - is_premium
+      filter: {}
+  - role: super_admin
+    permission:
+      columns:
+        - id
+        - key
+        - name
+        - description
+        - category
+        - is_premium
+        - created_at
+        - updated_at
+      filter: {}
+insert_permissions:
+  - role: super_admin
+    permission:
+      columns:
+        - key
+        - name
+        - description
+        - category
+        - is_premium
+      filter: {}
+      check: {}
+update_permissions:
+  - role: super_admin
+    permission:
+      columns:
+        - key
+        - name
+        - description
+        - category
+        - is_premium
+      filter: {}
+      check: {}

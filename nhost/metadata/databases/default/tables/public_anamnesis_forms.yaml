@@ -1,0 +1,70 @@
+table:
+  name: anamnesis_forms
+  schema: public
+object_relationships:
+  - name: tenant
+    using:
+      foreign_key_constraint_on: tenant_id
+  - name: patient
+    using:
+      foreign_key_constraint_on: patient_id
+  - name: appointment
+    using:
+      foreign_key_constraint_on: appointment_id
+  - name: template
+    using:
+      foreign_key_constraint_on: template_id
+select_permissions:
+  - role: user
+    permission:
+      columns:
+        - id
+        - tenant_id
+        - patient_id
+        - appointment_id
+        - template_id
+        - form_token
+        - form_data
+        - status
+        - alerts_detected
+        - expires_at
+        - completed_at
+        - sent_at
+        - created_at
+        - updated_at
+      filter:
+        tenant_id:
+          _eq: X-Hasura-Tenant-Id
+insert_permissions:
+  - role: user
+    permission:
+      columns:
+        - tenant_id
+        - patient_id
+        - appointment_id
+        - template_id
+        - form_token
+        - form_data
+        - status
+        - alerts_detected
+        - expires_at
+        - completed_at
+        - sent_at
+      filter: {}
+      check:
+        tenant_id:
+          _eq: X-Hasura-Tenant-Id
+update_permissions:
+  - role: user
+    permission:
+      columns:
+        - form_data
+        - status
+        - alerts_detected
+        - completed_at
+      filter:
+        tenant_id:
+          _eq: X-Hasura-Tenant-Id
+      check:
+        tenant_id:
+          _eq: X-Hasura-Tenant-Id

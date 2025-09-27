@@ -1,0 +1,306 @@
+# Queries para Anamnese
+query GetAnamnesisTemplates($limit: Int, $offset: Int, $where: anamnesis_templates_bool_exp, $order_by: [anamnesis_templates_order_by!]) {
+  anamnesis_templates(
+    limit: $limit
+    offset: $offset
+    where: $where
+    order_by: $order_by
+  ) {
+    id
+    tenant_id
+    name
+    description
+    sections
+    is_active
+    is_default
+    created_by
+    created_at
+    updated_at
+  }
+  anamnesis_templates_aggregate(where: $where) {
+    aggregate {
+      count
+    }
+  }
+}
+
+query GetAnamnesisTemplate($id: uuid!) {
+  anamnesis_templates_by_pk(id: $id) {
+    id
+    tenant_id
+    name
+    description
+    sections
+    is_active
+    is_default
+    created_by
+    created_at
+    updated_at
+  }
+}
+
+query GetAnamnesisForms($limit: Int, $offset: Int, $where: anamnesis_forms_bool_exp, $order_by: [anamnesis_forms_order_by!]) {
+  anamnesis_forms(
+    limit: $limit
+    offset: $offset
+    where: $where
+    order_by: $order_by
+  ) {
+    id
+    tenant_id
+    patient_id
+    appointment_id
+    template_id
+    form_token
+    form_data
+    status
+    alerts_detected
+    expires_at
+    completed_at
+    sent_at
+    created_at
+    updated_at
+    patient {
+      id
+      name
+      phone
+      email
+    }
+    appointment {
+      id
+      title
+      start_datetime
+    }
+    template {
+      id
+      name
+      description
+    }
+  }
+  anamnesis_forms_aggregate(where: $where) {
+    aggregate {
+      count
+    }
+  }
+}
+
+query GetAnamnesisForm($id: uuid!) {
+  anamnesis_forms_by_pk(id: $id) {
+    id
+    tenant_id
+    patient_id
+    appointment_id
+    template_id
+    form_token
+    form_data
+    status
+    alerts_detected
+    expires_at
+    completed_at
+    sent_at
+    created_at
+    updated_at
+    patient {
+      id
+      name
+      phone
+      email
+    }
+    appointment {
+      id
+      title
+      start_datetime
+    }
+    template {
+      id
+      name
+      description
+      sections
+    }
+  }
+}
+
+query GetAnamnesisFormByToken($token: String!) {
+  anamnesis_forms(where: { form_token: { _eq: $token } }, limit: 1) {
+    id
+    tenant_id
+    patient_id
+    appointment_id
+    template_id
+    form_token
+    form_data
+    status
+    alerts_detected
+    expires_at
+    completed_at
+    sent_at
+    created_at
+    updated_at
+    patient {
+      id
+      name
+      phone
+      email
+    }
+    appointment {
+      id
+      title
+      start_datetime
+    }
+    template {
+      id
+      name
+      description
+      sections
+    }
+  }
+}
+
+# Mutations para Anamnese
+mutation CreateAnamnesisTemplate($object: anamnesis_templates_insert_input!) {
+  insert_anamnesis_templates_one(object: $object) {
+    id
+    tenant_id
+    name
+    description
+    sections
+    is_active
+    is_default
+    created_by
+    created_at
+    updated_at
+  }
+}
+
+mutation UpdateAnamnesisTemplate($id: uuid!, $changes: anamnesis_templates_set_input!) {
+  update_anamnesis_templates_by_pk(pk_columns: $id, _set: $changes) {
+    id
+    tenant_id
+    name
+    description
+    sections
+    is_active
+    is_default
+    created_by
+    created_at
+    updated_at
+  }
+}
+
+mutation DeleteAnamnesisTemplate($id: uuid!) {
+  delete_anamnesis_templates_by_pk(id: $id) {
+    id
+  }
+}
+
+mutation CreateAnamnesisForm($object: anamnesis_forms_insert_input!) {
+  insert_anamnesis_forms_one(object: $object) {
+    id
+    tenant_id
+    patient_id
+    appointment_id
+    template_id
+    form_token
+    form_data
+    status
+    alerts_detected
+    expires_at
+    completed_at
+    sent_at
+    created_at
+    updated_at
+    patient {
+      id
+      name
+      phone
+      email
+    }
+    appointment {
+      id
+      title
+      start_datetime
+    }
+    template {
+      id
+      name
+      description
+    }
+  }
+}
+
+mutation UpdateAnamnesisForm($id: uuid!, $changes: anamnesis_forms_set_input!) {
+  update_anamnesis_forms_by_pk(pk_columns: $id, _set: $changes) {
+    id
+    tenant_id
+    patient_id
+    appointment_id
+    template_id
+    form_token
+    form_data
+    status
+    alerts_detected
+    expires_at
+    completed_at
+    sent_at
+    created_at
+    updated_at
+    patient {
+      id
+      name
+      phone
+      email
+    }
+    appointment {
+      id
+      title
+      start_datetime
+    }
+    template {
+      id
+      name
+      description
+    }
+  }
+}
+
+mutation DeleteAnamnesisForm($id: uuid!) {
+  delete_anamnesis_forms_by_pk(id: $id) {
+    id
+  }
+}
+
+# Subscription para atualizações em tempo real
+subscription AnamnesisFormsSubscription($where: anamnesis_forms_bool_exp) {
+  anamnesis_forms(where: $where, order_by: { created_at: desc }) {
+    id
+    tenant_id
+    patient_id
+    appointment_id
+    template_id
+    form_token
+    form_data
+    status
+    alerts_detected
+    expires_at
+    completed_at
+    sent_at
+    created_at
+    updated_at
+    patient {
+      id
+      name
+      phone
+      email
+    }
+    appointment {
+      id
+      title
+      start_datetime
+    }
+    template {
+      id
+      name
+      description
+    }
+  }
+}

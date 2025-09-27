@@ -1,0 +1,132 @@
+table:
+  name: tenants
+  schema: public
+object_relationships:
+  - name: plan
+    using:
+      foreign_key_constraint_on: plan_id
+array_relationships:
+  - name: users
+    using:
+      foreign_key_constraint_on:
+        column: tenant_id
+        table:
+          name: users
+          schema: public
+  - name: patients
+    using:
+      foreign_key_constraint_on:
+        column: tenant_id
+        table:
+          name: patients
+          schema: public
+  - name: professionals
+    using:
+      foreign_key_constraint_on:
+        column: tenant_id
+        table:
+          name: professionals
+          schema: public
+  - name: appointments
+    using:
+      foreign_key_constraint_on:
+        column: tenant_id
+        table:
+          name: appointments
+          schema: public
+  - name: materials
+    using:
+      foreign_key_constraint_on:
+        column: tenant_id
+        table:
+          name: materials
+          schema: public
+  - name: feature_overrides
+    using:
+      foreign_key_constraint_on:
+        column: tenant_id
+        table:
+          name: tenant_feature_overrides
+          schema: public
+select_permissions:
+  - role: user
+    permission:
+      columns:
+        - id
+        - name
+        - logo_url
+        - primary_color
+        - secondary_color
+        - is_active
+        - plan_id
+        - subscription_status
+        - created_at
+        - updated_at
+      filter:
+        _or:
+          - id:
+              _eq: X-Hasura-Tenant-Id
+          - _exists:
+              _table:
+                name: users
+                schema: public
+              _where:
+                _and:
+                  - tenant_id:
+                      _eq: X-Hasura-Tenant-Id
+                  - id:
+                      _eq: X-Hasura-User-Id
+  - role: super_admin
+    permission:
+      columns:
+        - id
+        - name
+        - subdomain
+        - logo_url
+        - primary_color
+        - secondary_color
+        - is_active
+        - plan_id
+        - subscription_status
+        - trial_ends_at
+        - subscription_starts_at
+        - subscription_ends_at
+        - billing_email
+        - billing_address
+        - created_at
+        - updated_at
+      filter: {}
+update_permissions:
+  - role: owner
+    permission:
+      columns:
+        - name
+        - logo_url
+        - primary_color
+        - secondary_color
+        - billing_email
+        - billing_address
+      filter:
+        id:
+          _eq: X-Hasura-Tenant-Id
+      check:
+        id:
+          _eq: X-Hasura-Tenant-Id
+  - role: super_admin
+    permission:
+      columns:
+        - name
+        - subdomain
+        - logo_url
+        - primary_color
+        - secondary_color
+        - is_active
+        - plan_id
+        - subscription_status
+        - trial_ends_at
+        - subscription_starts_at
+        - subscription_ends_at
+        - billing_email
+        - billing_address
+      filter: {}
+      check: {}

@@ -1,0 +1,54 @@
+table:
+  name: material_categories
+  schema: public
+object_relationships:
+  - name: tenant
+    using:
+      foreign_key_constraint_on: tenant_id
+array_relationships:
+  - name: materials
+    using:
+      foreign_key_constraint_on:
+        column: category_id
+        table:
+          name: materials
+          schema: public
+select_permissions:
+  - role: user
+    permission:
+      columns:
+        - id
+        - tenant_id
+        - name
+        - description
+        - is_active
+        - created_at
+        - updated_at
+      filter:
+        tenant_id:
+          _eq: X-Hasura-Tenant-Id
+insert_permissions:
+  - role: user
+    permission:
+      columns:
+        - tenant_id
+        - name
+        - description
+        - is_active
+      filter: {}
+      check:
+        tenant_id:
+          _eq: X-Hasura-Tenant-Id
+update_permissions:
+  - role: user
+    permission:
+      columns:
+        - name
+        - description
+        - is_active
+      filter:
+        tenant_id:
+          _eq: X-Hasura-Tenant-Id
+      check:
+        tenant_id:
+          _eq: X-Hasura-Tenant-Id

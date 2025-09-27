@@ -1,0 +1,63 @@
+[global]
+environment = "production"
+
+[hasura]
+version = "v2.36.0"
+admin_secret = "{{ secrets.HASURA_GRAPHQL_ADMIN_SECRET }}"
+webhook_secret = "{{ secrets.NHOST_WEBHOOK_SECRET }}"
+
+[hasura.settings]
+cors_domain = ["https://your-domain.com", "https://www.your-domain.com"]
+dev_mode = false
+enable_allowlist = true
+enable_console = false
+enable_remote_schema_permissions = true
+enabled_log_types = ["http-log", "webhook-log"]
+
+[hasura.logs]
+level = "error"
+
+[hasura.events]
+http_pool_size = 100
+
+[auth]
+version = "0.21.2"
+
+[auth.settings]
+allowed_email_domains = ""
+allowed_emails = ""
+allowed_roles = "user,professional,admin,owner,super_admin"
+default_allowed_roles = "user"
+default_role = "user"
+disable_new_users = false
+gravatar_enabled = true
+gravatar_default = "blank"
+gravatar_rating = "g"
+
+[auth.settings.smtp]
+host = "{{ secrets.SMTP_HOST }}"
+port = 587
+user = "{{ secrets.SMTP_USER }}"
+password = "{{ secrets.SMTP_PASSWORD }}"
+sender = "{{ secrets.SMTP_SENDER }}"
+method = "STARTTLS"
+secure = true
+
+[auth.redirections]
+client_url = "https://your-domain.com"
+allowed_urls = "https://your-domain.com,https://www.your-domain.com"
+
+[auth.provider.google]
+enabled = true
+client_id = "{{ secrets.GOOGLE_CLIENT_ID }}"
+client_secret = "{{ secrets.GOOGLE_CLIENT_SECRET }}"
+
+[postgres]
+version = "14.6-20221215-1"
+
+[storage]
+version = "0.6.0"
+
+[functions]
+[functions.node]
+version = 18

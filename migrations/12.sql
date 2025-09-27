@@ -1,0 +1,17 @@
+
+CREATE TABLE user_invitations (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  tenant_id INTEGER NOT NULL,
+  email TEXT NOT NULL,
+  role TEXT NOT NULL,
+  invitation_token TEXT NOT NULL,
+  invited_by INTEGER NOT NULL,
+  expires_at DATETIME NOT NULL,
+  accepted_at DATETIME,
+  is_used BOOLEAN DEFAULT 0,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+ALTER TABLE tenants ADD COLUMN max_users INTEGER DEFAULT 10;
+ALTER TABLE tenants ADD COLUMN current_users INTEGER DEFAULT 1;

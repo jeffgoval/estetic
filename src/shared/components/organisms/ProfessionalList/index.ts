@@ -1,0 +1,1 @@
+export { ProfessionalList } from './ProfessionalList';

@@ -1,0 +1,93 @@
+table:
+  name: subscription_plans
+  schema: public
+array_relationships:
+  - name: tenants
+    using:
+      foreign_key_constraint_on:
+        column: plan_id
+        table:
+          name: tenants
+          schema: public
+  - name: plan_features
+    using:
+      foreign_key_constraint_on:
+        column: plan_id
+        table:
+          name: plan_features
+          schema: public
+select_permissions:
+  - role: user
+    permission:
+      columns:
+        - id
+        - name
+        - description
+        - price_monthly
+        - price_yearly
+        - max_users
+        - max_patients
+        - max_appointments_per_month
+        - features
+        - is_active
+        - is_popular
+        - sort_order
+      filter:
+        is_active:
+          _eq: true
+  - role: super_admin
+    permission:
+      columns:
+        - id
+        - name
+        - description
+        - price_monthly
+        - price_yearly
+        - max_users
+        - max_patients
+        - max_appointments_per_month
+        - features
+        - is_active
+        - is_popular
+        - sort_order
+        - created_at
+        - updated_at
+      filter: {}
+insert_permissions:
+  - role: super_admin
+    permission:
+      columns:
+        - name
+        - description
+        - price_monthly
+        - price_yearly
+        - max_users
+        - max_patients
+        - max_appointments_per_month
+        - features
+        - is_active
+        - is_popular
+        - sort_order
+      filter: {}
+      check: {}
+update_permissions:
+  - role: super_admin
+    permission:
+      columns:
+        - name
+        - description
+        - price_monthly
+        - price_yearly
+        - max_users
+        - max_patients
+        - max_appointments_per_month
+        - features
+        - is_active
+        - is_popular
+        - sort_order
+      filter: {}
+      check: {}
+delete_permissions:
+  - role: super_admin
+    permission:
+      filter: {}

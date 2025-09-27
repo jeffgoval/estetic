@@ -1,0 +1,307 @@
+# Queries para Super Admin
+query GetAllTenants($limit: Int, $offset: Int, $where: tenants_bool_exp, $order_by: [tenants_order_by!]) {
+  tenants(
+    limit: $limit
+    offset: $offset
+    where: $where
+    order_by: $order_by
+  ) {
+    id
+    name
+    subdomain
+    logo_url
+    primary_color
+    secondary_color
+    is_active
+    plan_id
+    subscription_status
+    trial_ends_at
+    subscription_starts_at
+    subscription_ends_at
+    billing_email
+    billing_address
+    created_at
+    updated_at
+    plan: subscription_plans {
+      id
+      name
+      price_monthly
+      price_yearly
+    }
+  }
+  tenants_aggregate(where: $where) {
+    aggregate {
+      count
+    }
+  }
+}
+
+query GetSubscriptionPlans($where: subscription_plans_bool_exp) {
+  subscription_plans(where: $where, order_by: { sort_order: asc }) {
+    id
+    name
+    description
+    price_monthly
+    price_yearly
+    max_users
+    max_patients
+    max_appointments_per_month
+    features
+    is_active
+    is_popular
+    sort_order
+    created_at
+    updated_at
+  }
+}
+
+query GetFeatureFlags($where: feature_flags_bool_exp) {
+  feature_flags(where: $where, order_by: { category: asc, name: asc }) {
+    id
+    key
+    name
+    description
+    category
+    is_premium
+    created_at
+    updated_at
+  }
+}
+
+query GetPlanFeatures($plan_id: uuid!) {
+  plan_features(where: { plan_id: { _eq: $plan_id } }) {
+    id
+    plan_id
+    feature_flag_id
+    is_enabled
+    limits
+    created_at
+    feature_flag {
+      id
+      key
+      name
+      description
+      category
+      is_premium
+    }
+  }
+}
+
+query GetTenantFeatureOverrides($tenant_id: uuid!) {
+  tenant_feature_overrides(where: { tenant_id: { _eq: $tenant_id } }) {
+    id
+    tenant_id
+    feature_flag_id
+    is_enabled
+    limits
+    expires_at
+    reason
+    created_by
+    created_at
+    feature_flag {
+      id
+      key
+      name
+      description
+      category
+    }
+  }
+}
+
+query GetTenantUsage($tenant_id: uuid!, $start_date: timestamptz!, $end_date: timestamptz!) {
+  tenant_usage(
+    where: {
+      tenant_id: { _eq: $tenant_id }
+      period_start: { _gte: $start_date }
+      period_end: { _lte: $end_date }
+    }
+    order_by: { period_start: desc }
+  ) {
+    id
+    tenant_id
+    feature_key
+    usage_count
+    period_start
+    period_end
+    metadata
+    created_at
+    updated_at
+  }
+}
+
+query GetBillingHistory($tenant_id: uuid!, $limit: Int, $offset: Int) {
+  billing_history(
+    where: { tenant_id: { _eq: $tenant_id } }
+    limit: $limit
+    offset: $offset
+    order_by: { created_at: desc }
+  ) {
+    id
+    tenant_id
+    plan_id
+    amount
+    currency
+    billing_period_start
+    billing_period_end
+    status
+    payment_method
+    external_payment_id
+    invoice_url
+    created_at
+    updated_at
+    plan: subscription_plans {
+      name
+    }
+  }
+}
+
+# Mutations para Super Admin
+mutation CreateSubscriptionPlan($object: subscription_plans_insert_input!) {
+  insert_subscription_plans_one(object: $object) {
+    id
+    name
+    description
+    price_monthly
+    price_yearly
+    max_users
+    max_patients
+    max_appointments_per_month
+    features
+    is_active
+    is_popular
+    sort_order
+    created_at
+    updated_at
+  }
+}
+
+mutation UpdateSubscriptionPlan($id: uuid!, $changes: subscription_plans_set_input!) {
+  update_subscription_plans_by_pk(pk_columns: { id: $id }, _set: $changes) {
+    id
+    name
+    description
+    price_monthly
+    price_yearly
+    max_users
+    max_patients
+    max_appointments_per_month
+    features
+    is_active
+    is_popular
+    sort_order
+    created_at
+    updated_at
+  }
+}
+
+mutation CreateFeatureFlag($object: feature_flags_insert_input!) {
+  insert_feature_flags_one(object: $object) {
+    id
+    key
+    name
+    description
+    category
+    is_premium
+    created_at
+    updated_at
+  }
+}
+
+mutation UpdateFeatureFlag($id: uuid!, $changes: feature_flags_set_input!) {
+  update_feature_flags_by_pk(pk_columns: { id: $id }, _set: $changes) {
+    id
+    key
+    name
+    description
+    category
+    is_premium
+    created_at
+    updated_at
+  }
+}
+
+mutation UpsertPlanFeature($object: plan_features_insert_input!, $on_conflict: plan_features_on_conflict!) {
+  insert_plan_features_one(object: $object, on_conflict: $on_conflict) {
+    id
+    plan_id
+    feature_flag_id
+    is_enabled
+    limits
+    created_at
+  }
+}
+
+mutation CreateTenantFeatureOverride($object: tenant_feature_overrides_insert_input!) {
+  insert_tenant_feature_overrides_one(object: $object) {
+    id
+    tenant_id
+    feature_flag_id
+    is_enabled
+    limits
+    expires_at
+    reason
+    created_by
+    created_at
+  }
+}
+
+mutation UpdateTenant($id: uuid!, $changes: tenants_set_input!) {
+  update_tenants_by_pk(pk_columns: { id: $id }, _set: $changes) {
+    id
+    name
+    subdomain
+    logo_url
+    primary_color
+    secondary_color
+    is_active
+    plan_id
+    subscription_status
+    trial_ends_at
+    subscription_starts_at
+    subscription_ends_at
+    billing_email
+    billing_address
+    created_at
+    updated_at
+  }
+}
+
+mutation CreateBillingRecord($object: billing_history_insert_input!) {
+  insert_billing_history_one(object: $object) {
+    id
+    tenant_id
+    plan_id
+    amount
+    currency
+    billing_period_start
+    billing_period_end
+    status
+    payment_method
+    external_payment_id
+    invoice_url
+    created_at
+    updated_at
+  }
+}
+
+# Subscription para monitoramento em tempo real
+subscription TenantsSubscription($where: tenants_bool_exp) {
+  tenants(where: $where, order_by: { created_at: desc }) {
+    id
+    name
+    subdomain
+    is_active
+    plan_id
+    subscription_status
+    trial_ends_at
+    subscription_starts_at
+    subscription_ends_at
+    created_at
+    updated_at
+    plan: subscription_plans {
+      id
+      name
+      price_monthly
+    }
+  }
+}

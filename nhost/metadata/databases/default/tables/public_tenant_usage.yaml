@@ -1,0 +1,56 @@
+table:
+  name: tenant_usage
+  schema: public
+object_relationships:
+  - name: tenant
+    using:
+      foreign_key_constraint_on: tenant_id
+select_permissions:
+  - role: owner
+    permission:
+      columns:
+        - id
+        - tenant_id
+        - feature_key
+        - usage_count
+        - period_start
+        - period_end
+        - metadata
+        - created_at
+        - updated_at
+      filter:
+        tenant_id:
+          _eq: X-Hasura-Tenant-Id
+  - role: super_admin
+    permission:
+      columns:
+        - id
+        - tenant_id
+        - feature_key
+        - usage_count
+        - period_start
+        - period_end
+        - metadata
+        - created_at
+        - updated_at
+      filter: {}
+insert_permissions:
+  - role: super_admin
+    permission:
+      columns:
+        - tenant_id
+        - feature_key
+        - usage_count
+        - period_start
+        - period_end
+        - metadata
+      filter: {}
+      check: {}
+update_permissions:
+  - role: super_admin
+    permission:
+      columns:
+        - usage_count
+        - metadata
+      filter: {}
+      check: {}

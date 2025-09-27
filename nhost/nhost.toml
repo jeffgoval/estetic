@@ -1,0 +1,61 @@
+[global]
+environment = "dev"
+
+[hasura]
+version = "v2.36.0"
+admin_secret = "nhost-admin-secret"
+webhook_secret = "nhost-webhook-secret"
+
+[hasura.settings]
+cors_domain = ["http://localhost:3000", "http://localhost:5173"]
+dev_mode = true
+enable_allowlist = false
+enable_console = true
+enable_remote_schema_permissions = false
+enabled_log_types = ["http-log", "webhook-log", "websocket-log"]
+
+[hasura.logs]
+level = "warn"
+
+[hasura.events]
+http_pool_size = 100
+
+[auth]
+version = "0.21.2"
+
+[auth.settings]
+allowed_email_domains = ""
+allowed_emails = ""
+allowed_roles = "user,professional,admin,owner,super_admin"
+default_allowed_roles = "user"
+default_role = "user"
+disable_new_users = false
+gravatar_enabled = true
+gravatar_default = "blank"
+gravatar_rating = "g"
+
+[auth.settings.smtp]
+host = "mailhog"
+port = 1025
+user = "user"
+password = "password"
+sender = "hasura-auth@example.com"
+method = ""
+secure = false
+
+[auth.redirections]
+client_url = "http://localhost:3000"
+allowed_urls = "http://localhost:3000,http://localhost:5173"
+
+[auth.provider.google]
+enabled = false
+
+[postgres]
+version = "14.6-20221215-1"
+
+[storage]
+version = "0.6.0"
+
+[functions]
+[functions.node]
+version = 18

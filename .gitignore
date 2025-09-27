@@ -1,0 +1,11 @@
+dist/
+node_modules/
+.wrangler/
+.dev.vars
+worker-configuration.d.ts
+
+# Arquivos de configuração sensíveis
+.env
+.env.local
+.env.production
+.nhost-admin-secret

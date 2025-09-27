@@ -1,0 +1,232 @@
+# Queries para Materiais
+query GetMaterials($limit: Int, $offset: Int, $where: materials_bool_exp, $order_by: [materials_order_by!]) {
+  materials(
+    limit: $limit
+    offset: $offset
+    where: $where
+    order_by: $order_by
+  ) {
+    id
+    tenant_id
+    category_id
+    name
+    brand
+    description
+    unit_type
+    min_stock_level
+    max_stock_level
+    current_stock
+    unit_cost
+    supplier_name
+    supplier_contact
+    is_active
+    created_at
+    updated_at
+    category {
+      id
+      name
+      description
+    }
+  }
+  materials_aggregate(where: $where) {
+    aggregate {
+      count
+    }
+  }
+}
+
+query GetMaterial($id: uuid!) {
+  materials_by_pk(id: $id) {
+    id
+    tenant_id
+    category_id
+    name
+    brand
+    description
+    unit_type
+    min_stock_level
+    max_stock_level
+    current_stock
+    unit_cost
+    supplier_name
+    supplier_contact
+    is_active
+    created_at
+    updated_at
+    category {
+      id
+      name
+      description
+    }
+  }
+}
+
+query GetMaterialCategories($where: material_categories_bool_exp) {
+  material_categories(where: $where, order_by: { name: asc }) {
+    id
+    tenant_id
+    name
+    description
+    is_active
+    created_at
+    updated_at
+  }
+}
+
+query GetMaterialEntries($limit: Int, $offset: Int, $where: material_entries_bool_exp, $order_by: [material_entries_order_by!]) {
+  material_entries(
+    limit: $limit
+    offset: $offset
+    where: $where
+    order_by: $order_by
+  ) {
+    id
+    tenant_id
+    material_id
+    entry_type
+    quantity
+    unit_cost
+    total_cost
+    expiry_date
+    batch_number
+    supplier_name
+    invoice_number
+    notes
+    created_by
+    created_at
+    material {
+      id
+      name
+      brand
+      unit_type
+    }
+  }
+  material_entries_aggregate(where: $where) {
+    aggregate {
+      count
+    }
+  }
+}
+
+# Mutations para Materiais
+mutation CreateMaterial($object: materials_insert_input!) {
+  insert_materials_one(object: $object) {
+    id
+    tenant_id
+    category_id
+    name
+    brand
+    description
+    unit_type
+    min_stock_level
+    max_stock_level
+    current_stock
+    unit_cost
+    supplier_name
+    supplier_contact
+    is_active
+    created_at
+    updated_at
+    category {
+      id
+      name
+      description
+    }
+  }
+}
+
+mutation UpdateMaterial($id: uuid!, $changes: materials_set_input!) {
+  update_materials_by_pk(pk_columns: { id: $id }, _set: $changes) {
+    id
+    tenant_id
+    category_id
+    name
+    brand
+    description
+    unit_type
+    min_stock_level
+    max_stock_level
+    current_stock
+    unit_cost
+    supplier_name
+    supplier_contact
+    is_active
+    created_at
+    updated_at
+    category {
+      id
+      name
+      description
+    }
+  }
+}
+
+mutation DeleteMaterial($id: uuid!) {
+  delete_materials_by_pk(id: $id) {
+    id
+  }
+}
+
+mutation CreateMaterialCategory($object: material_categories_insert_input!) {
+  insert_material_categories_one(object: $object) {
+    id
+    tenant_id
+    name
+    description
+    is_active
+    created_at
+    updated_at
+  }
+}
+
+mutation CreateMaterialEntry($object: material_entries_insert_input!) {
+  insert_material_entries_one(object: $object) {
+    id
+    tenant_id
+    material_id
+    entry_type
+    quantity
+    unit_cost
+    total_cost
+    expiry_date
+    batch_number
+    supplier_name
+    invoice_number
+    notes
+    created_by
+    created_at
+    material {
+      id
+      name
+      brand
+      unit_type
+    }
+  }
+}
+
+# Subscription para atualizações em tempo real
+subscription MaterialsSubscription($where: materials_bool_exp) {
+  materials(where: $where, order_by: { created_at: desc }) {
+    id
+    tenant_id
+    category_id
+    name
+    brand
+    description
+    unit_type
+    min_stock_level
+    max_stock_level
+    current_stock
+    unit_cost
+    supplier_name
+    supplier_contact
+    is_active
+    created_at
+    updated_at
+    category {
+      id
+      name
+      description
+    }
+  }
+}

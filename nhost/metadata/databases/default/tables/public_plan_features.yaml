@@ -1,0 +1,49 @@
+table:
+  name: plan_features
+  schema: public
+object_relationships:
+  - name: plan
+    using:
+      foreign_key_constraint_on: plan_id
+  - name: feature_flag
+    using:
+      foreign_key_constraint_on: feature_flag_id
+select_permissions:
+  - role: user
+    permission:
+      columns:
+        - id
+        - plan_id
+        - feature_flag_id
+        - is_enabled
+        - limits
+        - created_at
+      filter: {}
+  - role: super_admin
+    permission:
+      columns:
+        - id
+        - plan_id
+        - feature_flag_id
+        - is_enabled
+        - limits
+        - created_at
+      filter: {}
+insert_permissions:
+  - role: super_admin
+    permission:
+      columns:
+        - plan_id
+        - feature_flag_id
+        - is_enabled
+        - limits
+      filter: {}
+      check: {}
+update_permissions:
+  - role: super_admin
+    permission:
+      columns:
+        - is_enabled
+        - limits
+      filter: {}
+      check: {}

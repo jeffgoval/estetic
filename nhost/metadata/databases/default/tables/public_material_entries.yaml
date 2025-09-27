@@ -1,0 +1,54 @@
+table:
+  name: material_entries
+  schema: public
+object_relationships:
+  - name: tenant
+    using:
+      foreign_key_constraint_on: tenant_id
+  - name: material
+    using:
+      foreign_key_constraint_on: material_id
+  - name: created_by_user
+    using:
+      foreign_key_constraint_on: created_by
+select_permissions:
+  - role: user
+    permission:
+      columns:
+        - id
+        - tenant_id
+        - material_id
+        - entry_type
+        - quantity
+        - unit_cost
+        - total_cost
+        - expiry_date
+        - batch_number
+        - supplier_name
+        - invoice_number
+        - notes
+        - created_by
+        - created_at
+      filter:
+        tenant_id:
+          _eq: X-Hasura-Tenant-Id
+insert_permissions:
+  - role: user
+    permission:
+      columns:
+        - tenant_id
+        - material_id
+        - entry_type
+        - quantity
+        - unit_cost
+        - total_cost
+        - expiry_date
+        - batch_number
+        - supplier_name
+        - invoice_number
+        - notes
+        - created_by
+      filter: {}
+      check:
+        tenant_id:
+          _eq: X-Hasura-Tenant-Id

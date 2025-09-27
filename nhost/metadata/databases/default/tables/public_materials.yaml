@@ -1,0 +1,84 @@
+table:
+  name: materials
+  schema: public
+object_relationships:
+  - name: tenant
+    using:
+      foreign_key_constraint_on: tenant_id
+  - name: category
+    using:
+      foreign_key_constraint_on: category_id
+array_relationships:
+  - name: material_entries
+    using:
+      foreign_key_constraint_on:
+        column: material_id
+        table:
+          name: material_entries
+          schema: public
+select_permissions:
+  - role: user
+    permission:
+      columns:
+        - id
+        - tenant_id
+        - category_id
+        - name
+        - brand
+        - description
+        - unit_type
+        - min_stock_level
+        - max_stock_level
+        - current_stock
+        - unit_cost
+        - supplier_name
+        - supplier_contact
+        - is_active
+        - created_at
+        - updated_at
+      filter:
+        tenant_id:
+          _eq: X-Hasura-Tenant-Id
+insert_permissions:
+  - role: user
+    permission:
+      columns:
+        - tenant_id
+        - category_id
+        - name
+        - brand
+        - description
+        - unit_type
+        - min_stock_level
+        - max_stock_level
+        - current_stock
+        - unit_cost
+        - supplier_name
+        - supplier_contact
+        - is_active
+      filter: {}
+      check:
+        tenant_id:
+          _eq: X-Hasura-Tenant-Id
+update_permissions:
+  - role: user
+    permission:
+      columns:
+        - category_id
+        - name
+        - brand
+        - description
+        - unit_type
+        - min_stock_level
+        - max_stock_level
+        - current_stock
+        - unit_cost
+        - supplier_name
+        - supplier_contact
+        - is_active
+      filter:
+        tenant_id:
+          _eq: X-Hasura-Tenant-Id
+      check:
+        tenant_id:
+          _eq: X-Hasura-Tenant-Id

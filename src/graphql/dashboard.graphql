@@ -1,0 +1,194 @@
+# Queries para Dashboard
+query GetDashboardMetrics($tenant_id: uuid!, $start_date: timestamptz!, $end_date: timestamptz!) {
+  # Contadores básicos
+  patients_aggregate(where: { tenant_id: { _eq: $tenant_id }, is_active: { _eq: true } }) {
+    aggregate {
+      count
+    }
+  }
+  
+  professionals_aggregate(where: { tenant_id: { _eq: $tenant_id }, is_active: { _eq: true } }) {
+    aggregate {
+      count
+    }
+  }
+  
+  # Agendamentos do período
+  appointments_aggregate(
+    where: {
+      tenant_id: { _eq: $tenant_id }
+      start_datetime: { _gte: $start_date, _lte: $end_date }
+    }
+  ) {
+    aggregate {
+      count
+    }
+  }
+  
+  # Agendamentos por status
+  appointments_by_status: appointments_aggregate(
+    where: {
+      tenant_id: { _eq: $tenant_id }
+      start_datetime: { _gte: $start_date, _lte: $end_date }
+    }
+  ) {
+    nodes {
+      status
+    }
+  }
+  
+  # Agendamentos de hoje
+  today_appointments: appointments(
+    where: {
+      tenant_id: { _eq: $tenant_id }
+      start_datetime: { 
+        _gte: $start_date
+        _lt: $end_date
+      }
+    }
+    order_by: { start_datetime: asc }
+    limit: 10
+  ) {
+    id
+    title
+    start_datetime
+    end_datetime
+    status
+    patient {
+      id
+      name
+      phone
+    }
+    professional {
+      id
+      name
+    }
+  }
+  
+  # Materiais com estoque baixo
+  low_stock_materials: materials(
+    where: {
+      tenant_id: { _eq: $tenant_id }
+      is_active: { _eq: true }
+      current_stock: { _lte: { min_stock_level: {} } }
+    }
+    order_by: { current_stock: asc }
+    limit: 5
+  ) {
+    id
+    name
+    current_stock
+    min_stock_level
+    unit_type
+  }
+  
+  # Lista de espera
+  waiting_list_aggregate(
+    where: {
+      tenant_id: { _eq: $tenant_id }
+      status: { _eq: "waiting" }
+    }
+  ) {
+    aggregate {
+      count
+    }
+  }
+}
+
+query GetAppointmentsByProfessional($tenant_id: uuid!, $start_date: timestamptz!, $end_date: timestamptz!) {
+  appointments(
+    where: {
+      tenant_id: { _eq: $tenant_id }
+      start_datetime: { _gte: $start_date, _lte: $end_date }
+      status: { _in: ["completed", "confirmed", "scheduled"] }
+    }
+  ) {
+    professional_id
+    professional {
+      name
+    }
+    status
+  }
+}
+
+query GetRevenueByPeriod($tenant_id: uuid!, $start_date: timestamptz!, $end_date: timestamptz!) {
+  appointments(
+    where: {
+      tenant_id: { _eq: $tenant_id }
+      start_datetime: { _gte: $start_date, _lte: $end_date }
+      status: { _eq: "completed" }
+    }
+  ) {
+    id
+    start_datetime
+    service_type
+    # Aqui você pode adicionar campos de valor se tiver na tabela
+  }
+}
+
+query GetMaterialConsumption($tenant_id: uuid!, $start_date: timestamptz!, $end_date: timestamptz!) {
+  material_entries(
+    where: {
+      tenant_id: { _eq: $tenant_id }
+      created_at: { _gte: $start_date, _lte: $end_date }
+      entry_type: { _eq: "out" }
+    }
+    order_by: { created_at: desc }
+  ) {
+    id
+    material_id
+    quantity
+    total_cost
+    created_at
+    material {
+      name
+      unit_type
+    }
+  }
+}
+
+# Subscription para métricas em tempo real
+subscription DashboardMetricsSubscription($tenant_id: uuid!) {
+  # Agendamentos de hoje
+  appointments(
+    where: {
+      tenant_id: { _eq: $tenant_id }
+      start_datetime: { 
+        _gte: "today"
+        _lt: "tomorrow"
+      }
+    }
+    order_by: { start_datetime: asc }
+  ) {
+    id
+    title
+    start_datetime
+    end_datetime
+    status
+    patient {
+      id
+      name
+      phone
+    }
+    professional {
+      id
+      name
+    }
+  }
+  
+  # Materiais com estoque baixo
+  materials(
+    where: {
+      tenant_id: { _eq: $tenant_id }
+      is_active: { _eq: true }
+      current_stock: { _lte: { min_stock_level: {} } }
+    }
+    order_by: { current_stock: asc }
+  ) {
+    id
+    name
+    current_stock
+    min_stock_level
+    unit_type
+  }
+}

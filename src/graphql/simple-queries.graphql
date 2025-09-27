@@ -1,0 +1,386 @@
+# Queries simplificadas para geração de tipos
+
+# Pacientes
+query GetPatients {
+  patients {
+    id
+    tenant_id
+    name
+    phone
+    email
+    cpf
+    birth_date
+    address
+    emergency_contact
+    medical_history
+    is_active
+    created_at
+    updated_at
+  }
+}
+
+query GetPatient($id: uuid!) {
+  patients_by_pk(id: $id) {
+    id
+    tenant_id
+    name
+    phone
+    email
+    cpf
+    birth_date
+    address
+    emergency_contact
+    medical_history
+    is_active
+    created_at
+    updated_at
+  }
+}
+
+mutation CreatePatient($object: patients_insert_input!) {
+  insert_patients_one(object: $object) {
+    id
+    tenant_id
+    name
+    phone
+    email
+    cpf
+    birth_date
+    address
+    emergency_contact
+    medical_history
+    is_active
+    created_at
+    updated_at
+  }
+}
+
+# Agendamentos
+query GetAppointments {
+  appointments {
+    id
+    tenant_id
+    patient_id
+    professional_id
+    title
+    description
+    start_datetime
+    end_datetime
+    status
+    service_type
+    notes
+    created_by
+    created_at
+    updated_at
+    patient {
+      id
+      name
+      phone
+      email
+    }
+    professional {
+      id
+      name
+      specialty
+    }
+  }
+}
+
+mutation CreateAppointment($object: appointments_insert_input!) {
+  insert_appointments_one(object: $object) {
+    id
+    tenant_id
+    patient_id
+    professional_id
+    title
+    description
+    start_datetime
+    end_datetime
+    status
+    service_type
+    notes
+    created_by
+    created_at
+    updated_at
+    patient {
+      id
+      name
+      phone
+      email
+    }
+    professional {
+      id
+      name
+      specialty
+    }
+  }
+}
+
+# Profissionais
+query GetProfessionals {
+  professionals {
+    id
+    tenant_id
+    name
+    registration_number
+    specialty
+    phone
+    email
+    working_hours
+    is_active
+    created_at
+    updated_at
+  }
+}
+
+mutation CreateProfessional($object: professionals_insert_input!) {
+  insert_professionals_one(object: $object) {
+    id
+    tenant_id
+    name
+    registration_number
+    specialty
+    phone
+    email
+    working_hours
+    is_active
+    created_at
+    updated_at
+  }
+}
+
+# Materiais
+query GetMaterials {
+  materials {
+    id
+    tenant_id
+    category_id
+    name
+    brand
+    description
+    unit_type
+    min_stock_level
+    max_stock_level
+    current_stock
+    unit_cost
+    supplier_name
+    supplier_contact
+    is_active
+    created_at
+    updated_at
+    category {
+      id
+      name
+      description
+    }
+  }
+}
+
+mutation CreateMaterial($object: materials_insert_input!) {
+  insert_materials_one(object: $object) {
+    id
+    tenant_id
+    category_id
+    name
+    brand
+    description
+    unit_type
+    min_stock_level
+    max_stock_level
+    current_stock
+    unit_cost
+    supplier_name
+    supplier_contact
+    is_active
+    created_at
+    updated_at
+    category {
+      id
+      name
+      description
+    }
+  }
+}
+
+# Lista de Espera
+query GetWaitingList {
+  waiting_list {
+    id
+    tenant_id
+    patient_id
+    professional_id
+    preferred_date
+    preferred_time_start
+    preferred_time_end
+    priority
+    status
+    notes
+    created_at
+    updated_at
+    patient {
+      id
+      name
+      phone
+      email
+    }
+    professional {
+      id
+      name
+      specialty
+    }
+  }
+}
+
+# Anamnese
+query GetAnamnesisTemplates {
+  anamnesis_templates {
+    id
+    tenant_id
+    name
+    description
+    sections
+    is_active
+    is_default
+    created_by
+    created_at
+    updated_at
+  }
+}
+
+query GetAnamnesisForms {
+  anamnesis_forms {
+    id
+    tenant_id
+    patient_id
+    appointment_id
+    template_id
+    form_token
+    form_data
+    status
+    alerts_detected
+    expires_at
+    completed_at
+    sent_at
+    created_at
+    updated_at
+    patient {
+      id
+      name
+      phone
+      email
+    }
+    appointment {
+      id
+      title
+      start_datetime
+    }
+    template {
+      id
+      name
+      description
+    }
+  }
+}
+
+# Super Admin
+query GetAllTenants {
+  tenants {
+    id
+    name
+    subdomain
+    logo_url
+    primary_color
+    secondary_color
+    is_active
+    plan_id
+    subscription_status
+    trial_ends_at
+    subscription_starts_at
+    subscription_ends_at
+    billing_email
+    billing_address
+    created_at
+    updated_at
+  }
+}
+
+query GetSubscriptionPlans {
+  subscription_plans {
+    id
+    name
+    description
+    price_monthly
+    price_yearly
+    max_users
+    max_patients
+    max_appointments_per_month
+    features
+    is_active
+    is_popular
+    sort_order
+    created_at
+    updated_at
+  }
+}
+
+query GetFeatureFlags {
+  feature_flags {
+    id
+    key
+    name
+    description
+    category
+    is_premium
+    created_at
+    updated_at
+  }
+}
+
+# Subscriptions
+subscription PatientsSubscription {
+  patients {
+    id
+    tenant_id
+    name
+    phone
+    email
+    cpf
+    birth_date
+    address
+    emergency_contact
+    medical_history
+    is_active
+    created_at
+    updated_at
+  }
+}
+
+subscription AppointmentsSubscription {
+  appointments {
+    id
+    tenant_id
+    patient_id
+    professional_id
+    title
+    description
+    start_datetime
+    end_datetime
+    status
+    service_type
+    notes
+    created_by
+    created_at
+    updated_at
+    patient {
+      id
+      name
+      phone
+      email
+    }
+    professional {
+      id
+      name
+      specialty
+    }
+  }
+}
